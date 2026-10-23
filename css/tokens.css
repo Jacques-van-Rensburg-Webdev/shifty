@@ -1,0 +1,118 @@
+/* Design tokens. Every value used in styles.css comes from here.
+   Spacing follows the 8pt scale in design-grid-rules.md.
+   Look: Shifty poster palette (paper, ink, duotone red) from the Claude Design reference. */
+
+:root {
+  /* Frame */
+  --frame-width: 390px;
+  --frame-height: 844px;
+
+  /* Grid */
+  --grid-columns: 4;
+  --grid-margin: 16px;
+  --grid-gutter: 16px;
+
+  /* Spacing (8pt scale) */
+  --space-0-5: 4px;
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-6: 48px;
+  --space-8: 64px;
+
+  /* Zones */
+  --zone-status: 47px;
+  --zone-header: 56px;
+  --zone-tabbar: 56px;
+  --zone-safe-bottom: 34px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* Component sizes */
+  --size-tap: 48px;
+  --size-button: 48px;
+  --size-button-sm: 32px;
+  --size-input: 48px;
+  --size-row: 56px;
+  --size-row-2: 72px;
+  --size-icon: 24px;
+  --size-icon-sm: 16px;
+  --size-avatar: 40px;
+  --size-avatar-sm: 32px;
+  --size-avatar-lg: 64px;
+  --size-badge-month: 20px; /* approved exception: shift badge in month-grid cells */
+
+  /* Lines */
+  --border-hairline: 1px; /* cell dividers, card and input outlines */
+  --border-rule: 4px;     /* card top rule, label underline, bevels, focus rings */
+  --stripe-band: 4px;     /* each band of the red / dark-red header stripe */
+  --underline-today: 2px; /* approved exception: thickness and offset of the today underline */
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+
+  /* Typography: size / line height */
+  --font-family: Georgia, "Times New Roman", serif;
+  --font-display: Tahoma, Arial, sans-serif;
+  --text-xs: 12px;   --leading-xs: 16px;
+  --text-sm: 14px;   --leading-sm: 20px;
+  --text-base: 16px; --leading-base: 24px;
+  --text-lg: 20px;   --leading-lg: 28px;
+  --text-xl: 28px;   --leading-xl: 36px;
+  --weight-regular: 400;
+  --weight-bold: 700;
+
+  /* Colors: paper, ink, duotone red */
+  --color-bg: #f8f8f8;
+  --color-surface: #ffffff;
+  --color-text: #16161a;
+  --color-text-muted: #4d4d4d;
+  --color-border: #16161a;
+  --color-ink: #16161a;
+  --color-on-ink: #f8f8f8;
+  --color-on-ink-muted: #a3a3a3;
+  --color-primary: #d61c1c;
+  --color-primary-dark: #990000;
+  --color-on-primary: #ffffff;
+  --color-danger: #d61c1c;
+
+  /* Shift-type badges: C Closing, O Opening, X Other */
+  --color-shift-closing: #16161a;
+  --color-on-shift-closing: #ffffff;
+  --color-shift-opening: #10b981;
+  --color-on-shift-opening: #ffffff;
+  --color-shift-other: #0284c7;
+  --color-on-shift-other: #ffffff;
+  /* Faded: shift has passed or been completed */
+  --color-shift-closing-faded: #c8c8cc;
+  --color-shift-opening-faded: #b7ead6;
+  --color-shift-other-faded: #b3d7ec;
+  --color-on-shift-faded: #16161a;
+
+  /* Action buttons */
+  --color-action-edit: #0284c7;
+  --color-action-delete: #d61c1c;
+  --color-action-complete: #047857;
+  --color-on-action: #ffffff;
+
+  /* Bevel shades: light edge top-left, dark edge bottom-right */
+  --bevel-paper-light: #ffffff;
+  --bevel-paper-dark: #a3a3a3;
+  --bevel-ink-light: #4d4d4d;
+  --bevel-ink-dark: rgba(0, 0, 0, 0.6);
+  --bevel-color-light: rgba(255, 255, 255, 0.35);
+  --bevel-color-dark: rgba(0, 0, 0, 0.35);
+
+  /* Motion */
+  --motion-fast: 160ms;
+  --motion-slow: 240ms;
+
+  /* Grid overlay */
+  --overlay-column: rgba(255, 0, 0, 0.08);
+  --overlay-line: rgba(255, 0, 0, 0.5);
+  --overlay-text: #b91c1c;
+}

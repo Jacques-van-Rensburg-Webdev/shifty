@@ -1,0 +1,35 @@
+// Estimated tips for a shift that isn't completed yet. No HTML here.
+// Uses up to the last 8 completed shifts before it on the same weekday and of the same type
+// (or of any type on that weekday if there are none): their average tips per hour × this shift's length.
+
+import { DAYS, fromKey } from './dates.js';
+import { SHIFT_TYPES, shiftMinutes } from './shifts.js';
+
+const LAST = 8;
+
+// Newest first: completed shifts before `key` on `weekday`, optionally of one type.
+function pastShifts(shifts, key, weekday, type) {
+  return Object.entries(shifts)
+    .filter(([k, s]) => k < key && s.completed && fromKey(k).getDay() === weekday && (!type || s.type === type))
+    .sort(([a], [b]) => b.localeCompare(a))
+    .slice(0, LAST)
+    .map(([, s]) => s);
+}
+
+// -> { amount, count, label } e.g. label "average of 5 Thursday closing shifts", or null.
+export function estimateTips(shifts, key, shift) {
+  if (shift.completed) return null;
+  const weekday = fromKey(key).getDay();
+  let past = pastShifts(shifts, key, weekday, shift.type);
+  const sameType = past.length > 0;
+  if (!sameType) past = pastShifts(shifts, key, weekday, null);
+  if (!past.length) return null;
+
+  const perHour = past.reduce((sum, s) => sum + (s.tips || 0) / (shiftMinutes(s) / 60), 0) / past.length;
+  const kind = sameType ? `${DAYS[weekday]} ${SHIFT_TYPES[shift.type].toLowerCase()}` : DAYS[weekday];
+  return {
+    amount: Math.round(perHour * (shiftMinutes(shift) / 60) * 100) / 100,
+    count: past.length,
+    label: `average of ${past.length} ${kind} ${past.length === 1 ? 'shift' : 'shifts'}`,
+  };
+}

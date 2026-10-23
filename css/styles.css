@@ -1,0 +1,780 @@
+/* ---------- Reset ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--font-family);
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+img, svg { display: block; max-width: 100%; }
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+
+/* ---------- App shell (zones) ---------- */
+/* On desktop the app is centred at phone width so it matches the frame. */
+.app {
+  position: relative;
+  max-width: var(--frame-width);
+  min-height: 100dvh;
+  margin-inline: auto;
+  background: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header: ink band with the red / dark-red stripe running underneath */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding-top: var(--safe-top);
+  background: var(--color-ink);
+  color: var(--color-on-ink);
+  box-shadow:
+    0 var(--stripe-band) 0 var(--color-primary),
+    0 calc(var(--stripe-band) * 2) 0 var(--color-primary-dark);
+}
+.app-header-inner {
+  height: var(--zone-header);
+  padding-inline: var(--grid-margin);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.app-title {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  line-height: var(--leading-xl);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+}
+
+/* Content leaves room for the fixed tab bar so nothing hides under it */
+.app-content {
+  flex: 1;
+  padding-top: var(--space-3);
+  padding-bottom: calc(var(--space-3) + var(--zone-tabbar) + var(--safe-bottom));
+}
+
+/* Tab bar: fixed to the bottom, centred at phone width.
+   Slides away while scrolling down (js/tabbar.js). */
+.app-tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  max-width: var(--frame-width);
+  margin-inline: auto;
+  transform: translateY(0);
+  visibility: visible;
+  transition: transform var(--motion-slow) ease, visibility 0s linear 0s;
+}
+/* Hidden: below the screen and out of the tab order */
+.app-tabbar.is-hidden {
+  transform: translateY(100%);
+  visibility: hidden;
+  transition: transform var(--motion-slow) ease, visibility 0s linear var(--motion-slow);
+}
+.app-tabbar-inner {
+  height: calc(var(--zone-tabbar) + var(--safe-bottom));
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--space-0-5);
+  padding: var(--space-0-5) var(--space-0-5) 0;
+}
+/* Each tab is a raised ink key with no bottom edge; it runs through the safe area */
+.tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: var(--safe-bottom);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: var(--color-ink);
+  color: var(--color-on-ink-muted);
+  box-shadow:
+    inset var(--border-rule) var(--border-rule) 0 var(--bevel-ink-light),
+    inset calc(var(--border-rule) * -1) 0 0 var(--bevel-ink-dark);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: box-shadow var(--motion-fast) ease, color var(--motion-fast) ease;
+}
+.tab:active {
+  box-shadow:
+    inset var(--border-rule) var(--border-rule) 0 var(--bevel-ink-dark),
+    inset calc(var(--border-rule) * -1) 0 0 var(--bevel-ink-light);
+}
+/* Selected: paper key, ink label, red top bar, dark-red side edge */
+.tab[aria-current="page"] {
+  background: var(--color-on-ink);
+  color: var(--color-ink);
+  box-shadow:
+    inset 0 var(--border-rule) 0 var(--color-primary),
+    inset var(--border-rule) 0 0 var(--bevel-paper-dark),
+    inset calc(var(--border-rule) * -1) 0 0 var(--color-primary-dark);
+}
+.tab:focus-visible { outline: var(--border-rule) solid var(--color-primary); outline-offset: calc(var(--border-rule) * -1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .app-tabbar, .app-tabbar.is-hidden, .tab { transition: none; }
+}
+
+/* ---------- 4-column grid ---------- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+  column-gap: var(--grid-gutter);
+  row-gap: var(--space-2);
+  padding-inline: var(--grid-margin);
+}
+.span-1 { grid-column: span 1; }
+.span-2 { grid-column: span 2; }
+.span-3 { grid-column: span 3; }
+.span-4 { grid-column: 1 / -1; }
+.start-1 { grid-column-start: 1; }
+.start-2 { grid-column-start: 2; }
+.start-3 { grid-column-start: 3; }
+.start-4 { grid-column-start: 4; }
+.full-bleed { grid-column: 1 / -1; margin-inline: calc(var(--grid-margin) * -1); }
+
+/* Vertical spacing helpers (8pt scale) */
+.mt-1 { margin-top: var(--space-1); }
+.mt-2 { margin-top: var(--space-2); }
+.mt-3 { margin-top: var(--space-3); }
+.mt-4 { margin-top: var(--space-4); }
+.mt-6 { margin-top: var(--space-6); }
+.stack-1 { display: flex; flex-direction: column; gap: var(--space-1); }
+.stack-2 { display: flex; flex-direction: column; gap: var(--space-2); }
+
+/* ---------- Typography ---------- */
+.text-xs   { font-size: var(--text-xs);   line-height: var(--leading-xs); }
+.text-sm   { font-size: var(--text-sm);   line-height: var(--leading-sm); }
+.text-base { font-size: var(--text-base); line-height: var(--leading-base); }
+.text-lg   { font-size: var(--text-lg);   line-height: var(--leading-lg); }
+.text-xl   { font-size: var(--text-xl);   line-height: var(--leading-xl); }
+.text-muted { color: var(--color-text-muted); }
+.text-bold  { font-weight: var(--weight-bold); }
+.text-display { font-family: var(--font-display); text-transform: uppercase; }
+
+/* Screen title inside Content: text-xl, display caps */
+.screen-title {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  line-height: var(--leading-xl);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+}
+/* Section title inside Content: text-lg, display caps */
+.section-title {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+}
+/* Small muted caps heading between groups (16 row gap + 8 = 24 above) */
+.group-label {
+  margin-top: var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+/* Underlined label: display caps on a 4pt rule */
+.label {
+  width: fit-content;
+  padding-bottom: var(--space-0-5);
+  border-bottom: var(--border-rule) solid var(--color-border);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+}
+
+/* ---------- Components ---------- */
+.card {
+  background: var(--color-surface);
+  border-top: var(--border-rule) solid var(--color-ink);
+  border-radius: var(--radius-md);
+  padding: var(--space-2);
+}
+
+/* Bevelled buttons: raised (light edge top-left, dark bottom-right);
+   pressed or selected flips the bevel so the button looks pushed in. */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  height: var(--size-button);
+  padding-inline: var(--space-3);
+  border: var(--border-hairline) solid var(--color-ink);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+  box-shadow:
+    inset var(--border-rule) var(--border-rule) 0 var(--bevel-paper-light),
+    inset calc(var(--border-rule) * -1) calc(var(--border-rule) * -1) 0 var(--bevel-paper-dark);
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+}
+.button:active, .button[aria-pressed="true"] {
+  box-shadow:
+    inset var(--border-rule) var(--border-rule) 0 var(--bevel-paper-dark),
+    inset calc(var(--border-rule) * -1) calc(var(--border-rule) * -1) 0 var(--bevel-paper-light);
+}
+.button:focus-visible { outline: var(--border-rule) solid var(--color-primary); outline-offset: var(--border-rule); }
+
+.button-primary {
+  background: var(--color-ink);
+  color: var(--color-on-ink);
+  box-shadow:
+    inset var(--border-rule) var(--border-rule) 0 var(--bevel-ink-light),
+    inset calc(var(--border-rule) * -1) calc(var(--border-rule) * -1) 0 var(--bevel-ink-dark);
+}
+.button-primary:active, .button-primary[aria-pressed="true"] {
+  box-shadow:
+    inset var(--border-rule) var(--border-rule) 0 var(--bevel-ink-dark),
+    inset calc(var(--border-rule) * -1) calc(var(--border-rule) * -1) 0 var(--bevel-ink-light);
+}
+.button-outline-accent { color: var(--color-primary); }
+
+/* Coloured buttons (accent and actions) share one bevel */
+.button-accent, .button-edit, .button-delete, .button-complete {
+  border-color: var(--color-ink);
+  color: var(--color-on-action);
+  box-shadow:
+    inset var(--border-rule) var(--border-rule) 0 var(--bevel-color-light),
+    inset calc(var(--border-rule) * -1) calc(var(--border-rule) * -1) 0 var(--bevel-color-dark);
+}
+.button-accent:active, .button-edit:active, .button-delete:active, .button-complete:active,
+.button-complete[aria-pressed="true"] {
+  box-shadow:
+    inset var(--border-rule) var(--border-rule) 0 var(--bevel-color-dark),
+    inset calc(var(--border-rule) * -1) calc(var(--border-rule) * -1) 0 var(--bevel-color-light);
+}
+.button-accent   { background: var(--color-primary); }
+.button-edit     { background: var(--color-action-edit); }
+.button-delete   { background: var(--color-action-delete); }
+.button-complete { background: var(--color-action-complete); }
+
+.button:disabled {
+  cursor: not-allowed;
+  background: var(--color-bg);
+  border-color: var(--color-on-ink-muted);
+  color: var(--color-text-muted);
+  box-shadow: none;
+}
+.button-sm { height: var(--size-button-sm); padding-inline: var(--space-2); }
+/* Full-height button with smaller text, for long labels in half-width (span 2) buttons */
+.button-compact {
+  padding-inline: var(--space-2);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+}
+.button-block { width: 100%; }
+
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-tap);
+  height: var(--size-tap);
+  border: none;
+  background: none;
+  border-radius: var(--radius-full);
+}
+
+.input {
+  width: 100%;
+  height: var(--size-input);
+  padding-inline: var(--space-2);
+  border: var(--border-hairline) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+.input:focus-visible { outline: var(--border-rule) solid var(--color-primary); outline-offset: var(--border-rule); }
+
+.icon { width: var(--size-icon); height: var(--size-icon); }
+
+/* Screens without a tab bar (e.g. the shift form) */
+.no-tabbar .app-tabbar { display: none; }
+.no-tabbar .app-content { padding-bottom: var(--space-3); }
+
+/* ---------- Form fields ---------- */
+/* Label sits 24 below the previous row (16 gap + 8) and 16 above its input */
+.field-label {
+  margin-top: var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+.field-input {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+.field-input:disabled { color: var(--color-text-muted); border-color: var(--color-on-ink-muted); }
+/* Hint sits 8 below the row above it (16 gap − 8) */
+.form-hint {
+  margin-top: calc(var(--space-1) * -1);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--color-text-muted);
+}
+
+/* ---------- Month / week navigation ---------- */
+.nav-button { width: var(--size-tap); padding-inline: 0; justify-self: start; }
+.nav-button-end { justify-self: end; }
+.month-label {
+  align-self: center;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+}
+.month-label.is-range { font-size: var(--text-base); line-height: var(--leading-base); }
+
+/* ---------- Shift-type badge: 24pt circle, one letter ---------- */
+.shift-badge {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-icon);
+  height: var(--size-icon);
+  border-radius: var(--radius-full);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  font-weight: var(--weight-bold);
+}
+.badge-c { background: var(--color-shift-closing); color: var(--color-on-shift-closing); }
+.badge-o { background: var(--color-shift-opening); color: var(--color-on-shift-opening); }
+.badge-x { background: var(--color-shift-other); color: var(--color-on-shift-other); }
+.badge-c.is-faded { background: var(--color-shift-closing-faded); color: var(--color-on-shift-faded); }
+.badge-o.is-faded { background: var(--color-shift-opening-faded); color: var(--color-on-shift-faded); }
+.badge-x.is-faded { background: var(--color-shift-other-faded); color: var(--color-on-shift-faded); }
+
+/* ---------- Month grid: 7 day columns inside span 1–4 ---------- */
+.cal {
+  border: var(--border-hairline) solid var(--color-ink);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--color-surface);
+}
+.cal-head {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  padding-block: var(--space-0-5);
+  border-bottom: var(--border-hairline) solid var(--color-ink);
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  font-weight: var(--weight-bold);
+}
+.cal-body {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--border-hairline);
+  background: var(--color-ink);
+}
+/* 72 tall: 4 padding + date 24 + 4 gap + badge 20 + hour 16 + 4 padding */
+.cal-day, .cal-blank { height: var(--size-row-2); background: var(--color-surface); }
+.cal-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  padding: var(--space-0-5);
+  border: none;
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  font-weight: var(--weight-bold);
+  color: var(--color-text);
+}
+.cal-num { display: flex; justify-content: center; gap: var(--space-0-5); }
+/* Today: red underline under the date */
+.cal-day.is-today .cal-num > span {
+  text-decoration: underline;
+  text-decoration-color: var(--color-primary);
+  text-decoration-thickness: var(--underline-today);
+  text-underline-offset: var(--underline-today);
+}
+/* Selected: red inset ring plus › ‹ markers */
+.cal-day.is-selected { box-shadow: inset 0 0 0 var(--border-rule) var(--color-primary); }
+.cal-day.is-selected .cal-num::before { content: "›"; }
+.cal-day.is-selected .cal-num::after { content: "‹"; }
+.cal-day:focus-visible { outline: var(--border-rule) solid var(--color-primary); outline-offset: calc(var(--border-rule) * -1); }
+/* 20pt badge in month cells, 4 below the date; the today underline is thin and close to the date to clear it */
+.cal-day .shift-badge {
+  width: var(--size-badge-month);
+  height: var(--size-badge-month);
+  margin-top: var(--space-0-5);
+}
+.cal-hour {
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Week list: 56pt rows ---------- */
+.week-card {
+  background: var(--color-surface);
+  border: var(--border-hairline) solid var(--color-ink);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.week-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  width: 100%;
+  height: var(--size-row); /* exact 56 including the divider; content is centred */
+  padding: 0 var(--space-2);
+  border: none;
+  border-bottom: var(--border-hairline) solid var(--color-ink);
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-align: left;
+}
+.week-row:last-child { border-bottom: none; }
+.week-row.is-selected { background: var(--color-ink); color: var(--color-on-ink); }
+.week-row:focus-visible { outline: var(--border-rule) solid var(--color-primary); outline-offset: calc(var(--border-rule) * -1); }
+.week-day {
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  font-weight: var(--weight-bold);
+}
+.week-row.is-today .week-day { color: var(--color-primary); }
+.week-row.is-selected.is-today .week-day { color: var(--color-on-ink); }
+.week-row.is-selected .badge-c:not(.is-faded) { background: var(--color-on-ink); color: var(--color-ink); }
+.week-shift { display: flex; align-items: center; gap: var(--space-1); }
+.week-shift-text { display: flex; flex-direction: column; align-items: flex-end; }
+.week-type {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+}
+.week-off, .week-time {
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.week-row.is-selected .week-off, .week-row.is-selected .week-time { color: var(--color-on-ink); }
+
+/* ---------- Selected day card ---------- */
+.day-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  background: var(--color-surface);
+  border: var(--border-hairline) solid var(--color-ink);
+  border-radius: var(--radius-md);
+}
+.day-card-date {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+}
+.day-card-off { font-family: var(--font-display); color: var(--color-text-muted); }
+.day-shift { display: flex; align-items: center; gap: var(--space-2); }
+.day-shift-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.day-shift-time {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+.day-shift-meta { display: flex; flex-direction: column; align-items: flex-end; }
+.day-shift-length { font-family: var(--font-display); color: var(--color-text-muted); }
+.day-shift-status {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+/* Tips and bar-close lines, aligned with the shift text after the badge */
+.day-shift-extra {
+  padding-left: calc(var(--size-icon) + var(--space-2));
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--color-text-muted);
+}
+
+/* Estimated tips: amount, then what it's based on underneath */
+.day-shift-estimate { display: flex; flex-direction: column; }
+
+/* ---------- "So far" totals: 56pt rows ---------- */
+.sofar-card {
+  background: var(--color-surface);
+  border: var(--border-hairline) solid var(--color-ink);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.sofar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: var(--size-row);
+  padding-inline: var(--space-2);
+  border-bottom: var(--border-hairline) solid var(--color-ink);
+}
+.sofar-row:last-child { border-bottom: none; }
+.sofar-label {
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  font-weight: var(--weight-bold);
+}
+.sofar-value {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+.sofar-note { font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-text-muted); }
+
+/* ---------- Grid overlay (press G or add ?grid to the URL) ---------- */
+.grid-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: none;
+  display: none;
+}
+.grid-overlay.is-visible { display: block; }
+.grid-overlay-frame {
+  position: relative;
+  max-width: var(--frame-width);
+  height: 100%;
+  margin-inline: auto;
+}
+.grid-overlay-columns {
+  position: absolute;
+  inset: 0;
+  padding-inline: var(--grid-margin);
+  display: grid;
+  grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+  column-gap: var(--grid-gutter);
+}
+.grid-overlay-columns > div {
+  background: var(--overlay-column);
+  display: flex;
+  justify-content: center;
+  padding-top: calc(var(--overlay-numbers-top, 0px) + var(--space-1));
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  font-weight: var(--weight-bold);
+  color: var(--overlay-text);
+}
+.grid-overlay-rows {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(to bottom, var(--overlay-line) 1px, transparent 1px);
+  background-size: 100% var(--space-1);
+  opacity: 0.25;
+}
+.grid-overlay-zone {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-bottom: 1px dashed var(--overlay-line);
+}
+.grid-overlay-label {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding-inline: var(--space-0-5);
+  background: var(--color-bg);
+  border-radius: 0 var(--radius-sm) 0 0;
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  color: var(--overlay-text);
+}
+.grid-overlay-zone.is-bottom .grid-overlay-label {
+  top: auto;
+  bottom: 100%;
+  border-radius: 0 var(--radius-sm) 0 0;
+}
+
+/* ---------- Home ---------- */
+.today-date {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  line-height: var(--leading-xl);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+}
+
+/* ---------- Pay: ink total card with the red stripe ---------- */
+/* The stripe hangs 8 below the card; the next block's 16 gap + 8 margin keeps 16 clear */
+.pay-total {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+  padding: var(--space-2);
+  background: var(--color-ink);
+  color: var(--color-on-ink);
+  border-radius: var(--radius-md);
+  box-shadow:
+    0 var(--stripe-band) 0 var(--color-primary),
+    0 calc(var(--stripe-band) * 2) 0 var(--color-primary-dark);
+}
+.pay-total-label {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  color: var(--color-on-ink-muted);
+}
+.pay-total-value {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  line-height: var(--leading-xl);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+.pay-total-note { font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-on-ink-muted); }
+
+/* ---------- Money card rows (extends the "so far" card) ---------- */
+/* Rate or detail next to / under a label: small, regular, muted */
+.money-note {
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  font-weight: var(--weight-regular);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.money-label-stack { display: flex; flex-direction: column; }
+/* Sub-row: 48, indented 32, small text */
+.sofar-row.is-sub { min-height: var(--size-tap); padding-left: var(--space-4); }
+.money-sub-label, .money-sub-value {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  font-variant-numeric: tabular-nums;
+}
+.sofar-row.is-net { background: var(--color-bg); }
+/* Total row: ink, 64 */
+.sofar-row.is-total { min-height: var(--space-8); background: var(--color-ink); color: var(--color-on-ink); }
+.sofar-row.is-total .sofar-value { font-size: var(--text-xl); line-height: var(--leading-xl); }
+
+/* ---------- Completed shift rows: 72 ---------- */
+.sofar-row.is-shift { min-height: var(--size-row-2); }
+.pay-shift { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.pay-shift-text { display: flex; flex-direction: column; min-width: 0; }
+.pay-shift-nums { display: flex; flex-direction: column; align-items: flex-end; }
+.pay-shift-detail {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Print summary (month / week PDF via the print dialog) ---------- */
+.print-summary { display: none; }
+
+/* @page can't read custom properties from :root, so its values are written here directly. */
+@page { size: A4 portrait; margin: 16mm; }
+
+@media print {
+  body { background: var(--color-surface); }
+  .app, .grid-overlay { display: none; }
+  .print-summary {
+    display: block;
+    color: var(--color-ink);
+    font-family: var(--font-family);
+    font-size: var(--text-sm);
+    line-height: var(--leading-sm);
+  }
+  .print-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    line-height: var(--leading-xl);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+  }
+  /* Red / dark-red rule under the title (borders print without background printing) */
+  .print-stripe {
+    margin-block: var(--space-1);
+    border-top: var(--stripe-band) solid var(--color-primary);
+    border-bottom: var(--stripe-band) solid var(--color-primary-dark);
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .print-meta {
+    font-size: var(--text-xs);
+    line-height: var(--leading-xs);
+    color: var(--color-text-muted);
+  }
+  .print-heading {
+    margin-top: var(--space-3);
+    margin-bottom: var(--space-1);
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    line-height: var(--leading-lg);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+  }
+  .print-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+  }
+  .print-table th, .print-table td {
+    padding: var(--space-0-5) var(--space-1);
+    border-bottom: var(--border-hairline) solid var(--color-on-ink-muted);
+    text-align: left;
+  }
+  .print-table thead th {
+    border-bottom-color: var(--color-ink);
+    font-family: var(--font-display);
+    font-size: var(--text-xs);
+    line-height: var(--leading-xs);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+  }
+  .print-table thead { display: table-header-group; } /* repeats on every page */
+  .print-table tr { break-inside: avoid; }
+  .print-totals { width: auto; margin-bottom: var(--space-1); }
+  .print-totals th { padding-right: var(--space-4); font-weight: var(--weight-regular); }
+  .print-totals td { font-family: var(--font-display); font-weight: var(--weight-bold); }
+}

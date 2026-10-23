@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>SHIFTY</title>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <div class="app">
+
+    <!-- Zone: Header (56pt) -->
+    <header class="app-header">
+      <div class="app-header-inner">
+        <!-- App icon goes here, before the name (24pt, space-1 gap). To be added later. -->
+        <h1 class="app-title">SHIFTY</h1>
+      </div>
+    </header>
+
+    <!-- Zone: Content (scrolls). Filled by js/router.js with the active screen. -->
+    <main class="app-content"></main>
+
+    <!-- Zone: Tab bar (56pt + safe area). Fixed; hides while scrolling down (js/tabbar.js). -->
+    <nav class="app-tabbar" aria-label="Main">
+      <div class="app-tabbar-inner">
+        <a class="tab" href="#/home">Home</a>
+        <a class="tab" href="#/calendar">Calendar</a>
+        <a class="tab" href="#/pay">Pay</a>
+      </div>
+    </nav>
+
+  </div>
+</body>
+</html>
