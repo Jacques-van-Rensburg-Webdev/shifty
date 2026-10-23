@@ -31,25 +31,15 @@ It opens full-screen and works offline after the first visit. Your shifts and pa
 Updates: push to `main` and GitHub Pages republishes. The app loads the newest files whenever it's online
 (network first). When adding a new file to the app, also add it to `APP_FILES` in `sw.js` so it works offline.
 
-## Grid
-
-- Rules: `design-grid-rules.md`
-- Reference image: `docs/grid-reference.svg` (or `.png`)
-- Overlay: press **G** in the browser, or add `?grid` to the URL
-
-Reference positions as **Zone → Columns → Spacing → Size**, for example:
-*"Content, columns 1–2, at 96: product tile, 192pt tall."*
-
 ## Structure
 
 ```
 CLAUDE.md               rules for Claude
-design-grid-rules.md    layout and spacing rules
 index.html              entry page (Header, Content, Tab bar)
 manifest.webmanifest    install on the phone: name, icons, full-screen
 sw.js                   service worker: offline use, network first
 css/tokens.css          all design values
-css/styles.css          reset, shell, grid, components, overlay
+css/styles.css          reset, shell, grid, components, print
 js/app.js               entry script
 js/router.js            hash router: #/home, #/calendar, #/pay, #/shift/<new|edit>/<date>
 js/tabbar.js            hides the tab bar while scrolling down
@@ -67,8 +57,6 @@ js/screens/             one module per tab (home, calendar, pay) + shift-form
 js/components/          month grid, week list, day panel, so-far card, shift badge,
                         period nav, save field, money card, completed shifts
 js/print/               month / week summary, saved as PDF via the browser's print dialog
-js/grid-overlay.js      G-key grid overlay
 assets/images/          app icon (placeholder): icon.svg + 512 / 192 / 180 PNGs
-docs/                   grid reference image
 task/todo.md            plan, checklist and review
 ```

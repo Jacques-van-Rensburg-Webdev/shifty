@@ -1,5 +1,5 @@
 /* Design tokens. Every value used in styles.css comes from here.
-   Spacing follows the 8pt scale in design-grid-rules.md.
+   Spacing follows the 8pt scale (see the design rules in CLAUDE.md).
    Look: Shifty poster palette (paper, ink, duotone red) from the Claude Design reference. */
 
 :root {
@@ -110,9 +110,4 @@
   /* Motion */
   --motion-fast: 160ms;
   --motion-slow: 240ms;
-
-  /* Grid overlay */
-  --overlay-column: rgba(255, 0, 0, 0.08);
-  --overlay-line: rgba(255, 0, 0, 0.5);
-  --overlay-text: #b91c1c;
 }

@@ -570,69 +570,6 @@ button { cursor: pointer; }
 }
 .sofar-note { font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-text-muted); }
 
-/* ---------- Grid overlay (press G or add ?grid to the URL) ---------- */
-.grid-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  pointer-events: none;
-  display: none;
-}
-.grid-overlay.is-visible { display: block; }
-.grid-overlay-frame {
-  position: relative;
-  max-width: var(--frame-width);
-  height: 100%;
-  margin-inline: auto;
-}
-.grid-overlay-columns {
-  position: absolute;
-  inset: 0;
-  padding-inline: var(--grid-margin);
-  display: grid;
-  grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
-  column-gap: var(--grid-gutter);
-}
-.grid-overlay-columns > div {
-  background: var(--overlay-column);
-  display: flex;
-  justify-content: center;
-  padding-top: calc(var(--overlay-numbers-top, 0px) + var(--space-1));
-  font-size: var(--text-xs);
-  line-height: var(--leading-xs);
-  font-weight: var(--weight-bold);
-  color: var(--overlay-text);
-}
-.grid-overlay-rows {
-  position: absolute;
-  inset: 0;
-  background-image: linear-gradient(to bottom, var(--overlay-line) 1px, transparent 1px);
-  background-size: 100% var(--space-1);
-  opacity: 0.25;
-}
-.grid-overlay-zone {
-  position: absolute;
-  left: 0;
-  right: 0;
-  border-bottom: 1px dashed var(--overlay-line);
-}
-.grid-overlay-label {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  padding-inline: var(--space-0-5);
-  background: var(--color-bg);
-  border-radius: 0 var(--radius-sm) 0 0;
-  font-size: var(--text-xs);
-  line-height: var(--leading-xs);
-  color: var(--overlay-text);
-}
-.grid-overlay-zone.is-bottom .grid-overlay-label {
-  top: auto;
-  bottom: 100%;
-  border-radius: 0 var(--radius-sm) 0 0;
-}
-
 /* ---------- Home ---------- */
 .today-date {
   font-family: var(--font-display);
@@ -717,7 +654,7 @@ button { cursor: pointer; }
 
 @media print {
   body { background: var(--color-surface); }
-  .app, .grid-overlay { display: none; }
+  .app { display: none; }
   .print-summary {
     display: block;
     color: var(--color-ink);

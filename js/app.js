@@ -1,6 +1,5 @@
 import { initRouter } from './router.js';
 import { initTabbar } from './tabbar.js';
-import { initGridOverlay } from './grid-overlay.js';
 
 // Service worker for offline use (browsers only allow it on https and localhost).
 function registerServiceWorker() {
@@ -13,7 +12,6 @@ function registerServiceWorker() {
 function init() {
   initRouter();
   initTabbar();
-  initGridOverlay();
   registerServiceWorker();
 }
 
