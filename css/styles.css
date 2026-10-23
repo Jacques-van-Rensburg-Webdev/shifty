@@ -1,7 +1,7 @@
 /* ---------- Reset ---------- */
 *, *::before, *::after { box-sizing: border-box; }
 * { margin: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
 body {
   font-family: var(--font-family);
   font-size: var(--text-base);
@@ -11,6 +11,8 @@ body {
 }
 img, svg { display: block; max-width: 100%; }
 button, input, textarea, select { font: inherit; color: inherit; }
+/* Turn off the browser's own look (iPhone Safari restyles buttons, dropdowns and date / time fields) */
+button, input, textarea, select { -webkit-appearance: none; appearance: none; margin: 0; border-radius: 0; }
 button { cursor: pointer; }
 
 /* ---------- App shell (zones) ---------- */
@@ -135,6 +137,8 @@ button { cursor: pointer; }
   row-gap: var(--space-2);
   padding-inline: var(--grid-margin);
 }
+/* Grid children may shrink to their columns, even with wide content (e.g. time fields) */
+.grid > * { min-width: 0; }
 .span-1 { grid-column: span 1; }
 .span-2 { grid-column: span 2; }
 .span-3 { grid-column: span 3; }
@@ -270,13 +274,7 @@ button { cursor: pointer; }
 .button-delete   { background: var(--color-action-delete); }
 .button-complete { background: var(--color-action-complete); }
 
-.button:disabled {
-  cursor: not-allowed;
-  background: var(--color-bg);
-  border-color: var(--color-on-ink-muted);
-  color: var(--color-text-muted);
-  box-shadow: none;
-}
+.button:disabled { cursor: not-allowed; opacity: var(--opacity-disabled); }
 .button-sm { height: var(--size-button-sm); padding-inline: var(--space-2); }
 /* Full-height button with smaller text, for long labels in half-width (span 2) buttons */
 .button-compact {
@@ -298,7 +296,9 @@ button { cursor: pointer; }
 }
 
 .input {
+  display: block;
   width: 100%;
+  min-width: 0; /* iPhone time and date fields otherwise refuse to shrink to their column */
   height: var(--size-input);
   padding-inline: var(--space-2);
   border: var(--border-hairline) solid var(--color-border);
@@ -306,6 +306,21 @@ button { cursor: pointer; }
   background: var(--color-surface);
 }
 .input:focus-visible { outline: var(--border-rule) solid var(--color-primary); outline-offset: var(--border-rule); }
+.input::placeholder { color: var(--color-text-muted); opacity: 1; }
+/* Disabled fields: same faded look everywhere (Safari otherwise fades some fields and not others) */
+.input:disabled { cursor: not-allowed; opacity: var(--opacity-disabled); -webkit-text-fill-color: currentColor; }
+/* Date / time fields: value on the left like the other fields */
+.input::-webkit-date-and-time-value { text-align: left; }
+/* Dropdowns: our own small arrow, since the browser's is turned off */
+select.input {
+  padding-right: var(--space-6);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--color-text) 50%),
+    linear-gradient(135deg, var(--color-text) 50%, transparent 50%);
+  background-position: calc(100% - var(--space-3)) 50%, calc(100% - var(--space-2)) 50%;
+  background-size: var(--space-1) var(--space-1);
+  background-repeat: no-repeat;
+}
 
 .icon { width: var(--size-icon); height: var(--size-icon); }
 
@@ -329,7 +344,6 @@ button { cursor: pointer; }
   font-weight: var(--weight-bold);
   font-variant-numeric: tabular-nums;
 }
-.field-input:disabled { color: var(--color-text-muted); border-color: var(--color-on-ink-muted); }
 /* Hint sits 8 below the row above it (16 gap − 8) */
 .form-hint {
   margin-top: calc(var(--space-1) * -1);

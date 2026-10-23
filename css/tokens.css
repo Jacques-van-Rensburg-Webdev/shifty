@@ -107,6 +107,9 @@
   --bevel-color-light: rgba(255, 255, 255, 0.35);
   --bevel-color-dark: rgba(0, 0, 0, 0.35);
 
+  /* Disabled buttons and fields: their normal look, faded */
+  --opacity-disabled: 0.4;
+
   /* Motion */
   --motion-fast: 160ms;
   --motion-slow: 240ms;
