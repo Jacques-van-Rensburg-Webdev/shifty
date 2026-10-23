@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Placeholder app icon: ink square, red / dark-red stripe, white S. Replace when the real icon is ready.
+       Everything important sits inside the central safe zone, so it also works as a maskable icon. -->
+  <rect width="512" height="512" fill="#16161a"/>
+  <rect y="336" width="512" height="24" fill="#d61c1c"/>
+  <rect y="360" width="512" height="24" fill="#990000"/>
+  <text x="256" y="300" text-anchor="middle" font-family="Tahoma, Arial, sans-serif" font-weight="700" font-size="280" fill="#f8f8f8">S</text>
+</svg>
