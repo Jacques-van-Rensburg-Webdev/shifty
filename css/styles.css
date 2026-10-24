@@ -313,7 +313,7 @@ button { cursor: pointer; }
 .picker-field { position: relative; }
 .picker-input {
   padding-block: 0;
-  padding-inline: var(--space-6);
+  padding-inline: calc(var(--space-2) + var(--size-icon)); /* 40: clears the icon, equal on both sides so the time stays centred */
   text-align: center;
   line-height: calc(var(--size-input) - var(--border-hairline) * 2); /* one line filling the field */
 }
