@@ -311,8 +311,20 @@ button { cursor: pointer; }
 .input:disabled { cursor: not-allowed; opacity: var(--opacity-disabled); -webkit-text-fill-color: currentColor; }
 /* Time and date fields: value centred, our clock / calendar icon inside on the right */
 .picker-field { position: relative; }
-.picker-input { padding-inline: var(--space-6); text-align: center; }
-.picker-input::-webkit-date-and-time-value { text-align: center; }
+.picker-input {
+  padding-block: 0;
+  padding-inline: var(--space-6);
+  text-align: center;
+  line-height: calc(var(--size-input) - var(--border-hairline) * 2); /* one line filling the field */
+}
+/* iPhone Safari otherwise pins its time / date box to the top of the field: make it the field's
+   full inner height with its line centred */
+.picker-input::-webkit-date-and-time-value {
+  height: calc(var(--size-input) - var(--border-hairline) * 2);
+  margin: 0;
+  line-height: calc(var(--size-input) - var(--border-hairline) * 2);
+  text-align: center;
+}
 .picker-input::-webkit-calendar-picker-indicator { display: none; } /* Chrome's own icon; ours replaces it */
 .picker-icon {
   position: absolute;
