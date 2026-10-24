@@ -10,6 +10,7 @@ import { isValidKey } from '../dates.js';
 import { DEFAULT_START, SHIFT_TYPES, barKind, endsNextDay, shiftMinutes } from '../shifts.js';
 import { formatHours } from '../format.js';
 import { getShift, removeShift, setShift } from '../storage.js';
+import { clearDrafts } from '../drafts.js';
 import { selectDay } from './calendar.js';
 import { pickerField } from '../components/picker-field.js';
 
@@ -72,7 +73,10 @@ export function render(container, [mode, key, from] = []) {
     event.preventDefault();
     if (!check()) return;
     const date = dateInput.value;
-    if (isEdit && date !== key) removeShift(key);
+    if (isEdit && date !== key) {
+      removeShift(key);
+      clearDrafts(key);
+    }
     const type = typeSelect.value;
     const kind = barKind(type);
     setShift(date, {

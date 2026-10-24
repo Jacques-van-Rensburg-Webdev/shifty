@@ -10,6 +10,7 @@ import { formatEuro, formatHours, formatTimeRange } from '../format.js';
 import { getShift, getShifts, removeShift, updateShift } from '../storage.js';
 import { estimateTips } from '../tips-estimate.js';
 import { formatAmountInput, parseAmount } from '../amount.js';
+import { clearDraft, clearDrafts, getDraft, setDraft } from '../drafts.js';
 import { shiftBadge } from './shift-badge.js';
 import { barRow, endedRow, startedRow } from './time-rows.js';
 
@@ -76,6 +77,7 @@ function actions(key, shift, onChange, from) {
       onClick: () => {
         if (!window.confirm('Delete this shift?')) return;
         removeShift(key);
+        clearDrafts(key);
         onChange();
       },
     }, [icon('delete')]),
@@ -84,12 +86,14 @@ function actions(key, shift, onChange, from) {
 
 // The field shows the saved tips and the button sets them to the amount entered (it doesn't add).
 // "Add tips" until tips are saved, then "Edit tips". An empty field or 0 removes the tips.
-// A comma or a dot works for cents ("12,50").
+// A comma or a dot works for cents ("12,50"). An amount typed but not saved yet is kept as a draft.
 function tipsRow(key, shift, onChange) {
   const saved = shift?.tips || 0;
+  const draft = shift ? getDraft(key, 'tips') : null;
   const input = el('input', {
     id: 'tips-amount', type: 'text', inputmode: 'decimal', autocomplete: 'off', placeholder: '0,00',
-    class: 'input field-input span-2', disabled: !shift, value: saved > 0 ? formatAmountInput(saved, 2) : '',
+    class: 'input field-input span-2', disabled: !shift,
+    value: draft ?? (saved > 0 ? formatAmountInput(saved, 2) : ''),
   });
   const entered = () => (input.value.trim() === '' ? 0 : Math.round(parseAmount(input.value) * 100) / 100);
   const canSave = () => {
@@ -104,11 +108,16 @@ function tipsRow(key, shift, onChange) {
     text: saved > 0 ? 'Edit tips' : 'Add tips',
     onClick: () => {
       if (!canSave()) return;
+      clearDraft(key, 'tips');
       updateShift(key, { tips: entered() });
       onChange();
     },
   });
-  input.addEventListener('input', () => { button.disabled = !shift || !canSave(); });
+  button.disabled = !shift || !canSave();
+  input.addEventListener('input', () => {
+    setDraft(key, 'tips', input.value);
+    button.disabled = !shift || !canSave();
+  });
   return [fieldLabel('tips-amount', 'Tips (€)'), input, button];
 }
 

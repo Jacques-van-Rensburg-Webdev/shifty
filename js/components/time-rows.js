@@ -1,29 +1,41 @@
 // The day panel's time rows: Started (Start), Ended (End), and Bar opened at or Bar closed at.
 // Each returns grid children: a label (columns 1–4), a time field (1–2) and a button (3–4).
+// A time typed but not saved yet is kept as a draft (see drafts.js) until its button saves it.
 
 import { el } from '../dom.js';
 import { updateShift } from '../storage.js';
 import { barKind } from '../shifts.js';
 import { currentTime, keepCurrent } from '../live-time.js';
+import { clearDraft, getDraft, setDraft } from '../drafts.js';
 import { pickerField } from './picker-field.js';
 
 const fieldLabel = (id, text) => el('label', { class: 'field-label span-4', for: id, text });
 
-// A time field that shows the logged time, or the current time (kept up to date) until it's logged.
-function timeInput(id, shift, logged, loggedValue) {
-  const live = Boolean(shift) && !logged;
+// A time field for `field` of the day `key`. Shows, in order: the logged time (locked) once logged,
+// a typed draft, or `fallback`; when there's no fallback, the current time (kept up to date).
+function timeInput({ id, key, field, shift, logged, loggedValue, fallback = null }) {
+  const draft = shift && !logged ? getDraft(key, field) : null;
+  const live = Boolean(shift) && !logged && draft == null && fallback == null;
+  let value = loggedValue;
+  if (shift && !logged) value = draft ?? fallback ?? currentTime();
   const input = el('input', {
-    id, type: 'time', class: 'input field-input',
-    value: live ? currentTime() : loggedValue, disabled: !shift || logged,
+    id, type: 'time', class: 'input field-input', value, disabled: !shift || logged,
   });
   if (live) keepCurrent(input);
+  if (shift && !logged) input.addEventListener('input', () => setDraft(key, field, input.value));
   return input;
+}
+
+// Saves `patch` and forgets the field's draft.
+function save(key, field, patch) {
+  clearDraft(key, field);
+  updateShift(key, patch);
 }
 
 // Start logs the real start time (the scheduled start is kept). Tapping Started undoes it.
 export function startedRow(key, shift, onChange) {
   const started = Boolean(shift?.started);
-  const input = timeInput('start-time', shift, started, shift?.start);
+  const input = timeInput({ id: 'start-time', key, field: 'start', shift, logged: started, loggedValue: shift?.start });
   // Start can't equal the end of an ended shift (that would count as 24 hours).
   const canStart = () => Boolean(input.value) && input.value !== shift.end;
   const button = el('button', {
@@ -38,7 +50,7 @@ export function startedRow(key, shift, onChange) {
         updateShift(key, { started: false, start: shift.plannedStart ?? shift.start, plannedStart: null });
       } else {
         if (!canStart()) return;
-        updateShift(key, { started: true, plannedStart: shift.plannedStart ?? shift.start, start: input.value });
+        save(key, 'start', { started: true, plannedStart: shift.plannedStart ?? shift.start, start: input.value });
       }
       onChange();
     },
@@ -50,7 +62,7 @@ export function startedRow(key, shift, onChange) {
 // End sets the end time and completes the shift (any planned end is kept). Tapping Ended undoes it.
 export function endedRow(key, shift, onChange) {
   const completed = Boolean(shift?.completed);
-  const input = timeInput('finish-time', shift, completed, shift?.end);
+  const input = timeInput({ id: 'finish-time', key, field: 'end', shift, logged: completed, loggedValue: shift?.end });
   // End can't equal the start (that would count as 24 hours).
   const canEnd = () => Boolean(input.value) && input.value !== shift.start;
   const button = el('button', {
@@ -65,7 +77,7 @@ export function endedRow(key, shift, onChange) {
         updateShift(key, { completed: false, end: shift.plannedEnd ?? null, plannedEnd: null });
       } else {
         if (!canEnd()) return;
-        updateShift(key, { completed: true, plannedEnd: shift.plannedEnd ?? shift.end ?? null, end: input.value });
+        save(key, 'end', { completed: true, plannedEnd: shift.plannedEnd ?? shift.end ?? null, end: input.value });
       }
       onChange();
     },
@@ -80,20 +92,16 @@ const BAR_ROWS = {
   close: { field: 'barClose', label: 'Bar closed at', log: 'Log bar close', update: 'Update close' },
 };
 
-// Shows the saved bar time; if none yet, the current time when live (today), otherwise the
-// shift's start (bar open) or end (bar close).
+// Shows a typed draft, else the saved bar time; if none yet, the current time when live (today),
+// otherwise the shift's start (bar open) or end (bar close).
 export function barRow(key, shift, isLive, onChange) {
   const kind = barKind(shift?.type ?? 'C');
   if (!kind) return [];
   const row = BAR_ROWS[kind];
   const saved = shift?.[row.field];
   const fallback = kind === 'open' ? shift?.start : shift?.end;
-  const live = Boolean(shift) && !saved && isLive;
-  const input = el('input', {
-    id: 'bar-time', type: 'time', class: 'input field-input',
-    value: live ? currentTime() : shift && (saved || fallback), disabled: !shift,
-  });
-  if (live) keepCurrent(input);
+  const shown = saved || (isLive ? null : fallback);
+  const input = timeInput({ id: 'bar-time', key, field: 'bar', shift, logged: false, fallback: shown ?? null });
   const button = el('button', {
     type: 'button',
     class: 'button button-primary button-compact button-block span-2',
@@ -103,7 +111,7 @@ export function barRow(key, shift, isLive, onChange) {
     onClick: () => {
       const time = input.value || fallback;
       if (!time) return;
-      updateShift(key, { [row.field]: time });
+      save(key, 'bar', { [row.field]: time });
       onChange();
     },
   });
