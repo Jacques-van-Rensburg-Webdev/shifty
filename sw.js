@@ -3,7 +3,7 @@
 // offline, the saved copy is used. Only this app's own files are handled.
 // When adding a file to the app, add it to APP_FILES so it's available offline from the first visit.
 
-const CACHE = 'shifty-v2';
+const CACHE = 'shifty-v3';
 
 const APP_FILES = [
   './',
@@ -15,6 +15,7 @@ const APP_FILES = [
   'assets/images/icon-192.png',
   'assets/images/icon-512.png',
   'assets/images/apple-touch-icon.png',
+  'js/amount.js',
   'js/app.js',
   'js/dates.js',
   'js/deductions.js',

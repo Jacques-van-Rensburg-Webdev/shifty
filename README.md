@@ -47,6 +47,7 @@ js/storage.js           shifts saved in localStorage, one per day
 js/shifts.js            shift length, non-tip hours, totals (no HTML)
 js/dates.js             date keys and formats; weeks start Monday
 js/format.js            hours (6,5 h), euros (€12,50), shift times
+js/amount.js            reads typed amounts with a comma or dot ("12,50") (no HTML)
 js/live-time.js         current time for Finished at / Bar closed at, kept up to date
 js/deductions.js        German deductions estimate (Übergangsbereich, SV, 2026 LSt)
 js/pay-calc.js          estimated pay for a month (no HTML)

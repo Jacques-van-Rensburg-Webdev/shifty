@@ -8,6 +8,7 @@ import { SHIFT_TYPES, shiftMinutes } from '../shifts.js';
 import { formatEuro, formatHours, formatTimeRange } from '../format.js';
 import { getShift, getShifts, removeShift, updateShift } from '../storage.js';
 import { estimateTips } from '../tips-estimate.js';
+import { parseAmount } from '../amount.js';
 import { currentTime, keepCurrent } from '../live-time.js';
 import { shiftBadge } from './shift-badge.js';
 
@@ -125,10 +126,10 @@ function barCloseRow(key, shift, isToday, onChange) {
   return [fieldLabel('bar-close', 'Bar closed at'), input, button];
 }
 
-// Tips add up; the input clears after adding.
+// Tips add up; the input clears after adding. A comma or a dot works for cents ("12,50").
 function tipsRow(key, shift, onChange) {
   const input = el('input', {
-    id: 'tips-amount', type: 'number', inputmode: 'decimal', min: '0', step: '0.01', placeholder: '0.00',
+    id: 'tips-amount', type: 'text', inputmode: 'decimal', autocomplete: 'off', placeholder: '0,00',
     class: 'input field-input span-2', disabled: !shift,
   });
   const button = el('button', {
@@ -138,13 +139,13 @@ function tipsRow(key, shift, onChange) {
     disabled: true,
     text: 'Add tips',
     onClick: () => {
-      const amount = Number(input.value);
+      const amount = parseAmount(input.value);
       if (!(amount > 0)) return;
       updateShift(key, { tips: Math.round(((shift.tips || 0) + amount) * 100) / 100 });
       onChange();
     },
   });
-  input.addEventListener('input', () => { button.disabled = !(Number(input.value) > 0); });
+  input.addEventListener('input', () => { button.disabled = !(parseAmount(input.value) > 0); });
   return [fieldLabel('tips-amount', 'Tips (€)'), input, button];
 }
 

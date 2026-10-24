@@ -130,8 +130,7 @@ export function render(container) {
       buttonText: 'Update %',
       isValid: (v) => v >= 0 && v <= 100,
       onSave: (v) => { updateSettings({ tipPercent: Math.round(v * 10) / 10 }); rerender(); },
-      step: '0.1',
-      max: '100',
+      decimals: null,
       placeholder: '5',
     }),
     moneyCard([
