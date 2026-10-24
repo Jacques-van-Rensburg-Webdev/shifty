@@ -309,8 +309,21 @@ button { cursor: pointer; }
 .input::placeholder { color: var(--color-text-muted); opacity: 1; }
 /* Disabled fields: same faded look everywhere (Safari otherwise fades some fields and not others) */
 .input:disabled { cursor: not-allowed; opacity: var(--opacity-disabled); -webkit-text-fill-color: currentColor; }
-/* Date / time fields: value on the left like the other fields */
-.input::-webkit-date-and-time-value { text-align: left; }
+/* Time and date fields: value centred, our clock / calendar icon inside on the right */
+.picker-field { position: relative; }
+.picker-input { padding-inline: var(--space-6); text-align: center; }
+.picker-input::-webkit-date-and-time-value { text-align: center; }
+.picker-input::-webkit-calendar-picker-indicator { display: none; } /* Chrome's own icon; ours replaces it */
+.picker-icon {
+  position: absolute;
+  top: 50%;
+  right: var(--space-2);
+  display: flex;
+  color: var(--color-text);
+  transform: translateY(-50%);
+  pointer-events: none; /* taps go to the field and open the picker */
+}
+.picker-field:has(.picker-input:disabled) .picker-icon { opacity: var(--opacity-disabled); }
 /* Dropdowns: our own small arrow, since the browser's is turned off */
 select.input {
   padding-right: var(--space-6);

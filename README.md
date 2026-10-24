@@ -56,7 +56,8 @@ js/view-month.js        the month shown on Pay, kept while switching tabs
 js/dom.js, js/icons.js  element helper and the design's icons
 js/screens/             one module per tab (home, calendar, pay) + shift-form
 js/components/          month grid, week list, day panel, so-far card, shift badge,
-                        period nav, save field, money card, completed shifts
+                        period nav, save field, money card, completed shifts,
+                        picker field (time / date with icon)
 js/print/               month / week summary, saved as PDF via the browser's print dialog
 assets/images/          app icon (placeholder): icon.svg + 512 / 192 / 180 PNGs
 task/todo.md            plan, checklist and review

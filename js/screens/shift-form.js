@@ -7,6 +7,7 @@ import { SHIFT_TYPES, endsNextDay, shiftMinutes } from '../shifts.js';
 import { formatHours } from '../format.js';
 import { getShift, removeShift, setShift } from '../storage.js';
 import { selectDay } from './calendar.js';
+import { pickerField } from '../components/picker-field.js';
 
 export const tab = 'calendar';
 export const hideTabbar = true;
@@ -24,13 +25,13 @@ export function render(container, [mode, key, from] = []) {
     return;
   }
 
-  const dateInput = el('input', { id: 'shift-date', type: 'date', class: 'input field-input span-4', value: key });
+  const dateInput = el('input', { id: 'shift-date', type: 'date', class: 'input field-input', value: key });
   const typeSelect = el('select', { id: 'shift-type', class: 'input field-input span-4' },
     Object.entries(SHIFT_TYPES).map(([code, name]) => el('option', {
       value: code, text: name, selected: (existing?.type ?? 'C') === code,
     })));
-  const startInput = el('input', { id: 'shift-start', type: 'time', class: 'input field-input span-2', value: existing?.start });
-  const endInput = el('input', { id: 'shift-end', type: 'time', class: 'input field-input span-2', value: existing?.end });
+  const startInput = el('input', { id: 'shift-start', type: 'time', class: 'input field-input', value: existing?.start });
+  const endInput = el('input', { id: 'shift-end', type: 'time', class: 'input field-input', value: existing?.end });
   const hint = el('p', { class: 'form-hint span-4', 'aria-live': 'polite' });
   const save = el('button', { type: 'submit', class: 'button button-primary button-block span-2 mt-1', text: 'Save' });
 
@@ -65,10 +66,10 @@ export function render(container, [mode, key, from] = []) {
 
   container.append(el('form', { class: 'grid', novalidate: true, onSubmit: submit, onInput: check, onChange: check }, [
     el('h2', { class: 'section-title span-4', text: isEdit ? 'Edit shift' : 'Add shift' }),
-    fieldLabel('shift-date', 'Date', 4), dateInput,
+    fieldLabel('shift-date', 'Date', 4), pickerField(dateInput, { span: 4, iconName: 'calendar' }),
     fieldLabel('shift-type', 'Type', 4), typeSelect,
     fieldLabel('shift-start', 'Start', 2), fieldLabel('shift-end', 'End', 2),
-    startInput, endInput,
+    pickerField(startInput), pickerField(endInput),
     hint,
     el('button', { type: 'button', class: 'button button-block span-2 mt-1', text: 'Cancel', onClick: back }),
     save,

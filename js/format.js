@@ -2,10 +2,10 @@
 
 const EURO = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-// 390 minutes -> "6,5 h"
+// Exact hours and minutes: 90 -> "1:30 h", 390 -> "6:30 h", 0 -> "0:00 h"
 export function formatHours(minutes) {
-  const hours = Math.round(minutes / 6) / 10;
-  return `${String(hours).replace('.', ',')} h`;
+  const total = Math.round(minutes);
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')} h`;
 }
 
 // 2345.6 -> "€2.345,60"; -120 -> "−€120,00"

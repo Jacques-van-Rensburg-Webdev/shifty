@@ -11,6 +11,7 @@ import { estimateTips } from '../tips-estimate.js';
 import { parseAmount } from '../amount.js';
 import { currentTime, keepCurrent } from '../live-time.js';
 import { shiftBadge } from './shift-badge.js';
+import { pickerField } from './picker-field.js';
 
 const fieldLabel = (id, text) => el('label', { class: 'field-label span-4', for: id, text });
 
@@ -81,7 +82,7 @@ function finishedRow(key, shift, isToday, onChange) {
   const completed = Boolean(shift?.completed);
   const live = Boolean(shift) && !completed && isToday;
   const input = el('input', {
-    id: 'finish-time', type: 'time', class: 'input field-input span-2',
+    id: 'finish-time', type: 'time', class: 'input field-input',
     value: live ? currentTime() : shift?.end, disabled: !shift || completed,
   });
   if (live) keepCurrent(input);
@@ -101,14 +102,14 @@ function finishedRow(key, shift, isToday, onChange) {
       onChange();
     },
   });
-  return [fieldLabel('finish-time', 'Finished at'), input, button];
+  return [fieldLabel('finish-time', 'Finished at'), pickerField(input), button];
 }
 
 // Shows the saved bar close; if none yet, the current time today, otherwise the shift's end.
 function barCloseRow(key, shift, isToday, onChange) {
   const live = Boolean(shift) && !shift.barClose && isToday;
   const input = el('input', {
-    id: 'bar-close', type: 'time', class: 'input field-input span-2',
+    id: 'bar-close', type: 'time', class: 'input field-input',
     value: live ? currentTime() : shift && (shift.barClose || shift.end), disabled: !shift,
   });
   if (live) keepCurrent(input);
@@ -123,7 +124,7 @@ function barCloseRow(key, shift, isToday, onChange) {
       onChange();
     },
   });
-  return [fieldLabel('bar-close', 'Bar closed at'), input, button];
+  return [fieldLabel('bar-close', 'Bar closed at'), pickerField(input), button];
 }
 
 // Tips add up; the input clears after adding. A comma or a dot works for cents ("12,50").
