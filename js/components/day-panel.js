@@ -8,7 +8,7 @@ import { SHIFT_TYPES, shiftMinutes } from '../shifts.js';
 import { formatEuro, formatHours, formatTimeRange } from '../format.js';
 import { getShift, getShifts, removeShift, updateShift } from '../storage.js';
 import { estimateTips } from '../tips-estimate.js';
-import { parseAmount } from '../amount.js';
+import { formatAmountInput, parseAmount } from '../amount.js';
 import { currentTime, keepCurrent } from '../live-time.js';
 import { shiftBadge } from './shift-badge.js';
 import { pickerField } from './picker-field.js';
@@ -127,26 +127,33 @@ function barCloseRow(key, shift, isToday, onChange) {
   return [fieldLabel('bar-close', 'Bar closed at'), pickerField(input), button];
 }
 
-// Tips add up; the input clears after adding. A comma or a dot works for cents ("12,50").
+// The field shows the saved tips and the button sets them to the amount entered (it doesn't add).
+// "Add tips" until tips are saved, then "Edit tips". An empty field or 0 removes the tips.
+// A comma or a dot works for cents ("12,50").
 function tipsRow(key, shift, onChange) {
+  const saved = shift?.tips || 0;
   const input = el('input', {
     id: 'tips-amount', type: 'text', inputmode: 'decimal', autocomplete: 'off', placeholder: '0,00',
-    class: 'input field-input span-2', disabled: !shift,
+    class: 'input field-input span-2', disabled: !shift, value: saved > 0 ? formatAmountInput(saved, 2) : '',
   });
+  const entered = () => (input.value.trim() === '' ? 0 : Math.round(parseAmount(input.value) * 100) / 100);
+  const canSave = () => {
+    const amount = entered();
+    return Number.isFinite(amount) && amount >= 0 && amount !== saved;
+  };
   const button = el('button', {
     type: 'button',
     class: 'button button-primary button-compact button-block span-2',
     'data-focus-key': 'add-tips',
     disabled: true,
-    text: 'Add tips',
+    text: saved > 0 ? 'Edit tips' : 'Add tips',
     onClick: () => {
-      const amount = parseAmount(input.value);
-      if (!(amount > 0)) return;
-      updateShift(key, { tips: Math.round(((shift.tips || 0) + amount) * 100) / 100 });
+      if (!canSave()) return;
+      updateShift(key, { tips: entered() });
       onChange();
     },
   });
-  input.addEventListener('input', () => { button.disabled = !(parseAmount(input.value) > 0); });
+  input.addEventListener('input', () => { button.disabled = !shift || !canSave(); });
   return [fieldLabel('tips-amount', 'Tips (€)'), input, button];
 }
 
