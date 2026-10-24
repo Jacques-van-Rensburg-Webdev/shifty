@@ -82,19 +82,26 @@ button { cursor: pointer; }
   transition: transform var(--motion-slow) ease, visibility 0s linear var(--motion-slow);
 }
 .app-tabbar-inner {
-  height: calc(var(--zone-tabbar) + var(--safe-bottom));
+  height: var(--zone-tabbar);
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(0, 1fr);
   gap: var(--space-0-5);
   padding: var(--space-0-5) var(--space-0-5) 0;
 }
-/* Each tab is a raised ink key with no bottom edge; it runs through the safe area */
+/* Safe area under the keys (the home-indicator strip in the home-screen app; 0 in Safari):
+   a plain ink strip, so the keys stay their normal height. Gaps between keys stay see-through. */
+.app-tabbar::after {
+  content: "";
+  display: block;
+  height: var(--safe-bottom);
+  background: var(--color-ink);
+}
+/* Each tab is a raised ink key with no bottom edge, filling the Tab bar zone; label centred */
 .tab {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-bottom: var(--safe-bottom);
   border-radius: var(--radius-sm) var(--radius-sm) 0 0;
   background: var(--color-ink);
   color: var(--color-on-ink-muted);
