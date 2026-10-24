@@ -23,7 +23,7 @@ export function formatPercent(value) {
   return `${String(value).replace('.', ',')} %`;
 }
 
-// "18:00–00:30"
+// "18:00–02:00", or "18:00" for a shift that has no end yet.
 export function formatTimeRange(shift) {
-  return `${shift.start}–${shift.end}`;
+  return shift.end ? `${shift.start}–${shift.end}` : shift.start;
 }

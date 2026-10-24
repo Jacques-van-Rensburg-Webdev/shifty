@@ -1,19 +1,23 @@
-// A day's shift: day card, Add or Edit / Delete, then Finished at, Bar closed at and Tips.
+// A day's shift: day card, Add or Edit / Delete, then Started, Ended, Bar closed at and Tips.
 // Returns grid children (each carries its own span). Used by the Calendar and Home.
 
 import { el } from '../dom.js';
 import { icon } from '../icons.js';
 import { formatLongDay, fromKey } from '../dates.js';
-import { SHIFT_TYPES, shiftMinutes } from '../shifts.js';
+import { SHIFT_TYPES, hasEnd, shiftMinutes } from '../shifts.js';
 import { formatEuro, formatHours, formatTimeRange } from '../format.js';
 import { getShift, getShifts, removeShift, updateShift } from '../storage.js';
 import { estimateTips } from '../tips-estimate.js';
 import { formatAmountInput, parseAmount } from '../amount.js';
-import { currentTime, keepCurrent } from '../live-time.js';
 import { shiftBadge } from './shift-badge.js';
-import { pickerField } from './picker-field.js';
+import { barCloseRow, endedRow, startedRow } from './time-rows.js';
 
 const fieldLabel = (id, text) => el('label', { class: 'field-label span-4', for: id, text });
+
+const shiftStatus = (shift) => {
+  if (shift.completed) return 'Completed';
+  return shift.started ? 'Started' : 'Planned';
+};
 
 function dayCard(key, shift, todayKey, showDate) {
   const estimate = shift && estimateTips(getShifts(), key, shift);
@@ -26,8 +30,8 @@ function dayCard(key, shift, todayKey, showDate) {
           el('span', { class: 'day-shift-time', text: formatTimeRange(shift) }),
         ]),
         el('span', { class: 'day-shift-meta' }, [
-          el('span', { class: 'day-shift-length', text: formatHours(shiftMinutes(shift)) }),
-          el('span', { class: 'day-shift-status', text: shift.completed ? 'Completed' : 'Planned' }),
+          hasEnd(shift) && el('span', { class: 'day-shift-length', text: formatHours(shiftMinutes(shift)) }),
+          el('span', { class: 'day-shift-status', text: shiftStatus(shift) }),
         ]),
       ]),
       shift.tips > 0 && el('span', { class: 'day-shift-extra', text: `Tips ${formatEuro(shift.tips)}` }),
@@ -76,57 +80,6 @@ function actions(key, shift, onChange, from) {
   ];
 }
 
-// Log complete: the finish time becomes the end (planned end kept). Tapping Completed undoes it.
-// When live (today), before completing, the field starts at the current time; otherwise at the shift's end.
-function finishedRow(key, shift, isToday, onChange) {
-  const completed = Boolean(shift?.completed);
-  const live = Boolean(shift) && !completed && isToday;
-  const input = el('input', {
-    id: 'finish-time', type: 'time', class: 'input field-input',
-    value: live ? currentTime() : shift?.end, disabled: !shift || completed,
-  });
-  if (live) keepCurrent(input);
-  const button = el('button', {
-    type: 'button',
-    class: 'button button-complete button-compact button-block span-2',
-    'aria-pressed': String(completed),
-    'data-focus-key': 'log-complete',
-    disabled: !shift,
-    text: completed ? 'Completed' : 'Log complete',
-    onClick: () => {
-      if (completed) {
-        updateShift(key, { completed: false, end: shift.plannedEnd ?? shift.end, plannedEnd: null });
-      } else {
-        updateShift(key, { completed: true, plannedEnd: shift.plannedEnd ?? shift.end, end: input.value || shift.end });
-      }
-      onChange();
-    },
-  });
-  return [fieldLabel('finish-time', 'Finished at'), pickerField(input), button];
-}
-
-// Shows the saved bar close; if none yet, the current time today, otherwise the shift's end.
-function barCloseRow(key, shift, isToday, onChange) {
-  const live = Boolean(shift) && !shift.barClose && isToday;
-  const input = el('input', {
-    id: 'bar-close', type: 'time', class: 'input field-input',
-    value: live ? currentTime() : shift && (shift.barClose || shift.end), disabled: !shift,
-  });
-  if (live) keepCurrent(input);
-  const button = el('button', {
-    type: 'button',
-    class: 'button button-primary button-compact button-block span-2',
-    'data-focus-key': 'bar-close',
-    disabled: !shift,
-    text: shift?.barClose ? 'Update close' : 'Log bar close',
-    onClick: () => {
-      updateShift(key, { barClose: input.value || shift.end });
-      onChange();
-    },
-  });
-  return [fieldLabel('bar-close', 'Bar closed at'), pickerField(input), button];
-}
-
 // The field shows the saved tips and the button sets them to the amount entered (it doesn't add).
 // "Add tips" until tips are saved, then "Edit tips". An empty field or 0 removes the tips.
 // A comma or a dot works for cents ("12,50").
@@ -157,7 +110,8 @@ function tipsRow(key, shift, onChange) {
   return [fieldLabel('tips-amount', 'Tips (€)'), input, button];
 }
 
-// live: fill Finished at / Bar closed at with the current time (today by default).
+// Started and Ended show the current time until they're logged.
+// live: fill Bar closed at with the current time (today by default).
 // showDate: show the date in the day card. from: where the shift form returns to.
 export function renderDayPanel({ key, todayKey, heading, onChange, from, showDate = true, live = key === todayKey }) {
   const shift = getShift(key);
@@ -165,7 +119,8 @@ export function renderDayPanel({ key, todayKey, heading, onChange, from, showDat
     el('h3', { class: 'group-label span-4', text: heading }),
     dayCard(key, shift, todayKey, showDate),
     ...actions(key, shift, onChange, from),
-    ...finishedRow(key, shift, live, onChange),
+    ...startedRow(key, shift, onChange),
+    ...endedRow(key, shift, onChange),
     ...barCloseRow(key, shift, live, onChange),
     ...tipsRow(key, shift, onChange),
   ];

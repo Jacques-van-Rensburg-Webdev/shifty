@@ -3,7 +3,7 @@
 
 import { el } from '../dom.js';
 import { formatLongDay, formatShortDay, fromKey, today } from '../dates.js';
-import { SHIFT_TYPES, shiftMinutes, totals } from '../shifts.js';
+import { SHIFT_TYPES, hasEnd, shiftMinutes, totals } from '../shifts.js';
 import { formatEuro, formatHours, formatTimeRange } from '../format.js';
 
 const COLUMNS = ['Date', 'Type', 'Time', 'Length', 'Status', 'Tips', 'Bar close'];
@@ -30,8 +30,8 @@ function shiftsTable(entries) {
       el('td', { text: formatShortDay(fromKey(key)) }),
       el('td', { text: SHIFT_TYPES[shift.type] }),
       el('td', { text: formatTimeRange(shift) }),
-      el('td', { text: formatHours(shiftMinutes(shift)) }),
-      el('td', { text: shift.completed ? 'Completed' : 'Planned' }),
+      el('td', { text: hasEnd(shift) ? formatHours(shiftMinutes(shift)) : '–' }),
+      el('td', { text: shift.completed ? 'Completed' : (shift.started ? 'Started' : 'Planned') }),
       el('td', { text: shift.tips > 0 ? formatEuro(shift.tips) : '–' }),
       el('td', { text: shift.barClose || '–' }),
     ]))),

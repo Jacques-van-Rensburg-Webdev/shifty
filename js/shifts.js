@@ -1,5 +1,8 @@
 // Shift calculations. No HTML here.
-// A shift: { type: 'C' | 'O' | 'X', start: 'HH:MM', end: 'HH:MM', plannedEnd, completed, barClose, tips }
+// A shift: { type: 'C' | 'O' | 'X', start: 'HH:MM', end: 'HH:MM' | null, plannedStart, plannedEnd,
+//           started, completed, barClose, tips }
+// Shifts are scheduled with a start time only; end is set when the shift is ended (completed shifts
+// always have one). Older shifts may have a planned end.
 // If end is at or before start, the shift runs past midnight; it belongs to the day it starts.
 
 export const SHIFT_TYPES = { C: 'Closing', O: 'Opening', X: 'Other' };
@@ -11,19 +14,24 @@ export function toMinutes(time) {
   return h * 60 + m;
 }
 
-export function endsNextDay({ start, end }) {
-  return toMinutes(end) <= toMinutes(start);
+export function hasEnd(shift) {
+  return Boolean(shift.end);
 }
 
+export function endsNextDay({ start, end }) {
+  return Boolean(end) && toMinutes(end) <= toMinutes(start);
+}
+
+// Only for shifts with an end (see hasEnd).
 export function shiftMinutes(shift) {
   const minutes = toMinutes(shift.end) - toMinutes(shift.start);
   return minutes <= 0 ? minutes + DAY_MINUTES : minutes;
 }
 
 // Time from bar close to the end of the shift (start to bar close is tip time).
-// No bar close logged counts as 0.
+// No bar close logged, or no end yet, counts as 0.
 export function nonTipMinutes(shift) {
-  if (!shift.barClose) return 0;
+  if (!shift.barClose || !shift.end) return 0;
   const start = toMinutes(shift.start);
   const end = start + shiftMinutes(shift);
   let barClose = toMinutes(shift.barClose);
