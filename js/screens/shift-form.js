@@ -2,10 +2,12 @@
 // One shift per day. No tab bar on this screen.
 // A shift is scheduled with its start time only; the end is logged with End on the day panel.
 // A completed shift also shows End here, so a wrong end time can be fixed.
+// Adding a shift fills in its type's start time (DEFAULT_START); changing the type swaps it,
+// unless the start has been typed in. A bar time the new type doesn't use is dropped on save.
 
 import { el } from '../dom.js';
 import { isValidKey } from '../dates.js';
-import { SHIFT_TYPES, endsNextDay, shiftMinutes } from '../shifts.js';
+import { DEFAULT_START, SHIFT_TYPES, barKind, endsNextDay, shiftMinutes } from '../shifts.js';
 import { formatHours } from '../format.js';
 import { getShift, removeShift, setShift } from '../storage.js';
 import { selectDay } from './calendar.js';
@@ -14,7 +16,9 @@ import { pickerField } from '../components/picker-field.js';
 export const tab = 'calendar';
 export const hideTabbar = true;
 
-const NEW_SHIFT = { end: null, started: false, completed: false, plannedStart: null, plannedEnd: null, barClose: null, tips: 0 };
+const NEW_SHIFT = {
+  end: null, started: false, completed: false, plannedStart: null, plannedEnd: null, barOpen: null, barClose: null, tips: 0,
+};
 
 const fieldLabel = (id, text, span) => el('label', { class: `field-label span-${span}`, for: id, text });
 
@@ -32,7 +36,16 @@ export function render(container, [mode, key, from] = []) {
     Object.entries(SHIFT_TYPES).map(([code, name]) => el('option', {
       value: code, text: name, selected: (existing?.type ?? 'C') === code,
     })));
-  const startInput = el('input', { id: 'shift-start', type: 'time', class: 'input field-input', value: existing?.start });
+  const startInput = el('input', {
+    id: 'shift-start', type: 'time', class: 'input field-input',
+    value: existing ? existing.start : DEFAULT_START[typeSelect.value] ?? '',
+  });
+  // The start follows the type until it's typed in (a new shift only).
+  let startTyped = Boolean(existing);
+  startInput.addEventListener('input', () => { startTyped = true; });
+  typeSelect.addEventListener('change', () => {
+    if (!startTyped) startInput.value = DEFAULT_START[typeSelect.value] ?? '';
+  });
   const withEnd = Boolean(existing?.completed);
   const endInput = withEnd && el('input', { id: 'shift-end', type: 'time', class: 'input field-input', value: existing.end });
   const hint = el('p', { class: 'form-hint span-4', 'aria-live': 'polite' });
@@ -60,11 +73,16 @@ export function render(container, [mode, key, from] = []) {
     if (!check()) return;
     const date = dateInput.value;
     if (isEdit && date !== key) removeShift(key);
+    const type = typeSelect.value;
+    const kind = barKind(type);
     setShift(date, {
       ...(existing || NEW_SHIFT),
-      type: typeSelect.value,
+      type,
       start: startInput.value,
       end: withEnd ? endInput.value : null,
+      barOpen: kind === 'open' ? existing?.barOpen ?? null : null,
+      barClose: kind === 'close' ? existing?.barClose ?? null : null,
+      ...(type === 'M' && { tips: 0 }),
     });
     selectDay(date);
     back();

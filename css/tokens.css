@@ -80,17 +80,20 @@
   --color-on-primary: #ffffff;
   --color-danger: #d61c1c;
 
-  /* Shift-type badges: C Closing, O Opening, X Other */
+  /* Shift-type badges: C Closing, O Opening, X Other, M Meeting */
   --color-shift-closing: #16161a;
   --color-on-shift-closing: #ffffff;
   --color-shift-opening: #10b981;
   --color-on-shift-opening: #ffffff;
   --color-shift-other: #0284c7;
   --color-on-shift-other: #ffffff;
+  --color-shift-meeting: #7c3aed;
+  --color-on-shift-meeting: #ffffff;
   /* Faded: shift has passed or been completed */
   --color-shift-closing-faded: #c8c8cc;
   --color-shift-opening-faded: #b7ead6;
   --color-shift-other-faded: #b3d7ec;
+  --color-shift-meeting-faded: #d9c8f7;
   --color-on-shift-faded: #16161a;
 
   /* Action buttons */

@@ -1,8 +1,9 @@
-// The day panel's time rows: Started (Start), Ended (End) and Bar closed at.
+// The day panel's time rows: Started (Start), Ended (End), and Bar opened at or Bar closed at.
 // Each returns grid children: a label (columns 1–4), a time field (1–2) and a button (3–4).
 
 import { el } from '../dom.js';
 import { updateShift } from '../storage.js';
+import { barKind } from '../shifts.js';
 import { currentTime, keepCurrent } from '../live-time.js';
 import { pickerField } from './picker-field.js';
 
@@ -73,26 +74,38 @@ export function endedRow(key, shift, onChange) {
   return [fieldLabel('finish-time', 'Ended'), pickerField(input), button];
 }
 
-// Shows the saved bar close; if none yet, the current time when live (today), otherwise the shift's end.
-export function barCloseRow(key, shift, isLive, onChange) {
-  const live = Boolean(shift) && !shift.barClose && isLive;
+// Bar opened at (Opening) or Bar closed at (Closing, Other); a meeting has neither.
+const BAR_ROWS = {
+  open: { field: 'barOpen', label: 'Bar opened at', log: 'Log bar open', update: 'Update open' },
+  close: { field: 'barClose', label: 'Bar closed at', log: 'Log bar close', update: 'Update close' },
+};
+
+// Shows the saved bar time; if none yet, the current time when live (today), otherwise the
+// shift's start (bar open) or end (bar close).
+export function barRow(key, shift, isLive, onChange) {
+  const kind = barKind(shift?.type ?? 'C');
+  if (!kind) return [];
+  const row = BAR_ROWS[kind];
+  const saved = shift?.[row.field];
+  const fallback = kind === 'open' ? shift?.start : shift?.end;
+  const live = Boolean(shift) && !saved && isLive;
   const input = el('input', {
-    id: 'bar-close', type: 'time', class: 'input field-input',
-    value: live ? currentTime() : shift && (shift.barClose || shift.end), disabled: !shift,
+    id: 'bar-time', type: 'time', class: 'input field-input',
+    value: live ? currentTime() : shift && (saved || fallback), disabled: !shift,
   });
   if (live) keepCurrent(input);
   const button = el('button', {
     type: 'button',
     class: 'button button-primary button-compact button-block span-2',
-    'data-focus-key': 'bar-close',
+    'data-focus-key': 'bar-time',
     disabled: !shift,
-    text: shift?.barClose ? 'Update close' : 'Log bar close',
+    text: saved ? row.update : row.log,
     onClick: () => {
-      const time = input.value || shift.end;
+      const time = input.value || fallback;
       if (!time) return;
-      updateShift(key, { barClose: time });
+      updateShift(key, { [row.field]: time });
       onChange();
     },
   });
-  return [fieldLabel('bar-close', 'Bar closed at'), pickerField(input), button];
+  return [fieldLabel('bar-time', row.label), pickerField(input), button];
 }

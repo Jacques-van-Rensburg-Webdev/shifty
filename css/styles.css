@@ -415,9 +415,11 @@ select.input {
 .badge-c { background: var(--color-shift-closing); color: var(--color-on-shift-closing); }
 .badge-o { background: var(--color-shift-opening); color: var(--color-on-shift-opening); }
 .badge-x { background: var(--color-shift-other); color: var(--color-on-shift-other); }
+.badge-m { background: var(--color-shift-meeting); color: var(--color-on-shift-meeting); }
 .badge-c.is-faded { background: var(--color-shift-closing-faded); color: var(--color-on-shift-faded); }
 .badge-o.is-faded { background: var(--color-shift-opening-faded); color: var(--color-on-shift-faded); }
 .badge-x.is-faded { background: var(--color-shift-other-faded); color: var(--color-on-shift-faded); }
+.badge-m.is-faded { background: var(--color-shift-meeting-faded); color: var(--color-on-shift-faded); }
 
 /* ---------- Month grid: 7 day columns inside span 1–4 ---------- */
 .cal {
@@ -572,7 +574,7 @@ select.input {
   text-transform: uppercase;
   color: var(--color-text-muted);
 }
-/* Tips and bar-close lines, aligned with the shift text after the badge */
+/* Tips and bar open / close lines, aligned with the shift text after the badge */
 .day-shift-extra {
   padding-left: calc(var(--size-icon) + var(--space-2));
   font-family: var(--font-display);

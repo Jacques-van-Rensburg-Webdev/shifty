@@ -1,16 +1,17 @@
-// A day's shift: day card, Add or Edit / Delete, then Started, Ended, Bar closed at and Tips.
+// A day's shift: day card, Add or Edit / Delete, then Started, Ended, the bar row and Tips.
+// A meeting has no bar row and no tips.
 // Returns grid children (each carries its own span). Used by the Calendar and Home.
 
 import { el } from '../dom.js';
 import { icon } from '../icons.js';
 import { formatLongDay, fromKey } from '../dates.js';
-import { SHIFT_TYPES, hasEnd, shiftMinutes } from '../shifts.js';
+import { SHIFT_TYPES, hasEnd, hasTips, shiftMinutes } from '../shifts.js';
 import { formatEuro, formatHours, formatTimeRange } from '../format.js';
 import { getShift, getShifts, removeShift, updateShift } from '../storage.js';
 import { estimateTips } from '../tips-estimate.js';
 import { formatAmountInput, parseAmount } from '../amount.js';
 import { shiftBadge } from './shift-badge.js';
-import { barCloseRow, endedRow, startedRow } from './time-rows.js';
+import { barRow, endedRow, startedRow } from './time-rows.js';
 
 const fieldLabel = (id, text) => el('label', { class: 'field-label span-4', for: id, text });
 
@@ -35,6 +36,7 @@ function dayCard(key, shift, todayKey, showDate) {
         ]),
       ]),
       shift.tips > 0 && el('span', { class: 'day-shift-extra', text: `Tips ${formatEuro(shift.tips)}` }),
+      shift.barOpen && el('span', { class: 'day-shift-extra', text: `Bar opened ${shift.barOpen}` }),
       shift.barClose && el('span', { class: 'day-shift-extra', text: `Bar closed ${shift.barClose}` }),
       estimate && el('span', { class: 'day-shift-extra day-shift-estimate' }, [
         el('span', { text: `Estimated tips ${formatEuro(estimate.amount)}` }),
@@ -111,7 +113,7 @@ function tipsRow(key, shift, onChange) {
 }
 
 // Started and Ended show the current time until they're logged.
-// live: fill Bar closed at with the current time (today by default).
+// live: fill the bar row with the current time (today by default).
 // showDate: show the date in the day card. from: where the shift form returns to.
 export function renderDayPanel({ key, todayKey, heading, onChange, from, showDate = true, live = key === todayKey }) {
   const shift = getShift(key);
@@ -121,7 +123,7 @@ export function renderDayPanel({ key, todayKey, heading, onChange, from, showDat
     ...actions(key, shift, onChange, from),
     ...startedRow(key, shift, onChange),
     ...endedRow(key, shift, onChange),
-    ...barCloseRow(key, shift, live, onChange),
-    ...tipsRow(key, shift, onChange),
+    ...barRow(key, shift, live, onChange),
+    ...(!shift || hasTips(shift) ? tipsRow(key, shift, onChange) : []),
   ];
 }
