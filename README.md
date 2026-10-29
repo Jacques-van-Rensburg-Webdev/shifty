@@ -39,7 +39,7 @@ index.html              entry page (Header, Content, Tab bar)
 manifest.webmanifest    install on the phone: name, icons, full-screen
 sw.js                   service worker: offline use, network first
 css/tokens.css          all design values
-css/styles.css          reset, shell, grid, components, print
+css/styles.css          reset, shell, grid, components
 js/app.js               entry script
 js/router.js            hash router: #/home, #/calendar, #/pay, #/shift/<new|edit>/<date>
 js/tabbar.js            hides the tab bar while scrolling down
@@ -52,13 +52,15 @@ js/live-time.js         current time for Finished at / Bar closed at, kept up to
 js/deductions.js        German deductions estimate (Übergangsbereich, SV, 2026 LSt)
 js/pay-calc.js          estimated pay for a month (no HTML)
 js/tips-estimate.js     estimated tips from past shifts on the same weekday (no HTML)
+js/week-tips.js         this week's tips: earned, still expected, predicted (no HTML)
 js/view-month.js        the month shown on Pay, kept while switching tabs
 js/dom.js, js/icons.js  element helper and the design's icons
 js/screens/             one module per tab (home, calendar, pay) + shift-form
 js/components/          month grid, week list, day panel, so-far card, shift badge,
                         period nav, save field, money card, completed shifts,
-                        picker field (time / date with icon)
-js/print/               month / week summary, saved as PDF via the browser's print dialog
+                        picker field (time / date with icon), week tips (Home)
+js/pdf/                 month / week summary as a PDF file made in the app (no library):
+                        the Share sheet on a phone (Save to Files, Mail, Print …), a download on a computer
 assets/images/          app icon (placeholder): icon.svg + 512 / 192 / 180 PNGs
 task/todo.md            plan, checklist and review
 ```

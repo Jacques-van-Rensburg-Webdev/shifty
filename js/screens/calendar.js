@@ -14,8 +14,8 @@ import { renderWeekList } from '../components/week-list.js';
 import { renderDayPanel } from '../components/day-panel.js';
 import { renderSoFar } from '../components/so-far.js';
 import { periodNav } from '../components/period-nav.js';
-import { buildSummary } from '../print/summary.js';
-import { printSummary } from '../print/print.js';
+import { buildSummaryPdf } from '../pdf/summary-pdf.js';
+import { sharePdf } from '../pdf/share.js';
 
 const state = { view: 'month', selectedKey: null };
 
@@ -49,19 +49,25 @@ export function render(container) {
     onClick: () => { state.view = view; rerender(); },
   });
 
-  // Month or week summary, saved as PDF from the browser's print dialog.
+  // Month or week summary as a PDF file: the Share sheet on a phone, a download on a computer.
+  // Built straight away in the click, so the phone still counts the Share sheet as a response to the tap.
   const summaryButton = () => el('button', {
     type: 'button',
     class: 'button button-block button-outline-accent span-4',
     text: `Save ${unit} summary (PDF)`,
-    onClick: () => printSummary(buildSummary({
-      title: isMonth ? formatMonth(selected) : `${formatRange(first, last)} ${last.getFullYear()}`,
-      firstKey: toKey(first),
-      lastKey: toKey(last),
-      todayKey,
-      shifts,
-      emptyText: `No shifts this ${unit}`,
-    }), isMonth ? `shifty-${toKey(first).slice(0, 7)}` : `shifty-week-${toKey(first)}`),
+    onClick: () => {
+      const title = isMonth ? formatMonth(selected) : `${formatRange(first, last)} ${last.getFullYear()}`;
+      const { bytes } = buildSummaryPdf({
+        title,
+        firstKey: toKey(first),
+        lastKey: toKey(last),
+        todayKey,
+        shifts,
+        emptyText: `No shifts this ${unit}`,
+      });
+      const fileName = isMonth ? `shifty-${toKey(first).slice(0, 7)}.pdf` : `shifty-week-${toKey(first)}.pdf`;
+      sharePdf(bytes, fileName, `Shifty – ${title}`);
+    },
   });
 
   const viewProps = { selectedKey: state.selectedKey, todayKey, shifts, onSelect: select };
