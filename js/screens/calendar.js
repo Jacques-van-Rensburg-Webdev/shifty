@@ -8,7 +8,7 @@ import {
   startOfMonth, startOfWeek, toKey, today,
 } from '../dates.js';
 import { totals } from '../shifts.js';
-import { getShifts } from '../storage.js';
+import { getSettings, getShifts } from '../storage.js';
 import { renderMonthGrid } from '../components/month-grid.js';
 import { renderWeekList } from '../components/week-list.js';
 import { renderDayPanel } from '../components/day-panel.js';
@@ -64,6 +64,7 @@ export function render(container) {
         todayKey,
         shifts,
         emptyText: `No shifts this ${unit}`,
+        tipPercent: getSettings().tipPercent,
       });
       const fileName = isMonth ? `shifty-${toKey(first).slice(0, 7)}.pdf` : `shifty-week-${toKey(first)}.pdf`;
       sharePdf(bytes, fileName, `Shifty – ${title}`);

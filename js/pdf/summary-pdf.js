@@ -5,7 +5,7 @@
 import { createPdf, PAGE } from './pdf-writer.js';
 import { formatLongDay, formatShortDay, fromKey, today } from '../dates.js';
 import { SHIFT_TYPES, hasEnd, shiftMinutes, totals } from '../shifts.js';
-import { formatEuro, formatHours, formatTimeRange } from '../format.js';
+import { formatEuro, formatHours, formatMinusEuro, formatPercent, formatTimeRange } from '../format.js';
 
 const INK = '#16161a';
 const RED = '#d61c1c';
@@ -44,8 +44,11 @@ function shiftCells(key, shift) {
   ];
 }
 
-// title: "October 2026" or "19 Oct – 25 Oct 2026". Returns the file's bytes.
-export function buildSummaryPdf({ title, firstKey, lastKey, todayKey, shifts, emptyText }) {
+const round2 = (v) => Math.round(v * 100) / 100;
+
+// title: "October 2026" or "19 Oct – 25 Oct 2026"; tipPercent: the tips deduction setting (Pay).
+// Returns the file's bytes.
+export function buildSummaryPdf({ title, firstKey, lastKey, todayKey, shifts, emptyText, tipPercent }) {
   const pdf = createPdf();
   const fullTitle = `SHIFTY – ${title}`.toUpperCase();
   let page = pdf.addPage();
@@ -70,7 +73,11 @@ export function buildSummaryPdf({ title, firstKey, lastKey, todayKey, shifts, em
   // ---------- So far
   heading('So far');
   const t = totals(shifts, firstKey, lastKey, todayKey);
+  // The tips deduction, worked out as on Pay (pay-calc.js), from the tips earned shown here.
+  const tipDeduction = round2((t.tips * tipPercent) / 100);
   [['Hours worked', formatHours(t.minutes)], ['Shifts', String(t.count)], ['Tips earned', formatEuro(t.tips)],
+    [`Tips deduction (${formatPercent(tipPercent)})`, formatMinusEuro(tipDeduction)],
+    ['Tips after deduction', formatEuro(round2(t.tips - tipDeduction))],
     ['Non-tip hours', formatHours(t.nonTip)]].forEach(([label, value]) => {
     y += ROW;
     page.text(MARGIN, y - 5, label, { size: 10, bold: true, color: INK });
