@@ -53,7 +53,7 @@ export function renderProjection({ projection, completedTotal, monthName, rate, 
       : moneyCard([{ label: 'No shifts still to come', value: '' }]),
     el('p', {
       class: 'sofar-note span-4',
-      text: 'Shifts still to come use the average hours and tips of last month\'s shifts on the same weekday. '
+      text: 'Shifts still to come use the average hours and tips of all your completed shifts on the same weekday. '
         + 'Each shift shows its pay before deductions. They change to the real figures as you complete them.',
     }),
   ];

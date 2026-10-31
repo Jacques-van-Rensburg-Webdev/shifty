@@ -1,11 +1,11 @@
 // Estimated length of a shift that isn't completed yet. No HTML here.
-// A shift with a planned end uses that; otherwise the average length of last month's shifts on the
+// A shift with a planned end uses that; otherwise the average length of every completed shift on the
 // same weekday (see past-shifts.js).
 
 import { hasEnd, shiftMinutes } from './shifts.js';
 import { pastShifts } from './past-shifts.js';
 
-// -> { minutes, label } e.g. label "average of 4 Friday closing shifts in October", or null.
+// -> { minutes, label } e.g. label "average of 12 Friday closing shifts", or null.
 export function estimateMinutes(shifts, key, shift) {
   if (shift.completed) return null;
   if (hasEnd(shift)) return { minutes: shiftMinutes(shift), label: 'planned end' };
