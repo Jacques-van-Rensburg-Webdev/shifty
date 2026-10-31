@@ -3,7 +3,7 @@
 // offline, the saved copy is used. Only this app's own files are handled.
 // When adding a file to the app, add it to APP_FILES so it's available offline from the first visit.
 
-const CACHE = 'shifty-v7';
+const CACHE = 'shifty-v8';
 
 const APP_FILES = [
   './',
@@ -23,7 +23,10 @@ const APP_FILES = [
   'js/dom.js',
   'js/format.js',
   'js/icons.js',
+  'js/hours-estimate.js',
   'js/live-time.js',
+  'js/month-projection.js',
+  'js/past-shifts.js',
   'js/pay-calc.js',
   'js/router.js',
   'js/shifts.js',
@@ -38,6 +41,7 @@ const APP_FILES = [
   'js/components/month-grid.js',
   'js/components/period-nav.js',
   'js/components/picker-field.js',
+  'js/components/projection.js',
   'js/components/save-field.js',
   'js/components/shift-badge.js',
   'js/components/so-far.js',

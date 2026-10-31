@@ -51,14 +51,18 @@ js/amount.js            reads typed amounts with a comma or dot ("12,50") (no HT
 js/live-time.js         current time for Finished at / Bar closed at, kept up to date
 js/deductions.js        German deductions estimate (Übergangsbereich, SV, 2026 LSt)
 js/pay-calc.js          estimated pay for a month (no HTML)
-js/tips-estimate.js     estimated tips from past shifts on the same weekday (no HTML)
+js/month-projection.js  projected pay for the whole month, planned shifts estimated (no HTML)
+js/past-shifts.js       last month's shifts on the same weekday, for estimates (no HTML)
+js/hours-estimate.js    estimated length of a planned shift (no HTML)
+js/tips-estimate.js     estimated tips from last month's shifts on the same weekday (no HTML)
 js/week-tips.js         this week's tips: earned, still expected, predicted (no HTML)
 js/view-month.js        the month shown on Pay, kept while switching tabs
 js/dom.js, js/icons.js  element helper and the design's icons
 js/screens/             one module per tab (home, calendar, pay) + shift-form
 js/components/          month grid, week list, day panel, so-far card, shift badge,
                         period nav, save field, money card, completed shifts,
-                        picker field (time / date with icon), week tips (Home)
+                        picker field (time / date with icon), week tips (Home),
+                        projection (Pay)
 js/pdf/                 month / week summary as a PDF file made in the app (no library):
                         the Share sheet on a phone (Save to Files, Mail, Print …), a download on a computer
 assets/images/          app icon (placeholder): icon.svg + 512 / 192 / 180 PNGs

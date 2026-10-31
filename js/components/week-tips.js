@@ -38,7 +38,7 @@ export function renderWeekTips({ shifts, date, todayKey }) {
       : moneyCard([{ label: 'No shifts this week', value: '' }]),
     el('p', {
       class: 'sofar-note span-4',
-      text: 'Estimates use your past shifts on the same weekday. They change to the real tips as you add them.',
+      text: 'Estimates use last month\'s shifts on the same weekday. They change to the real tips as you add them.',
     }),
   ];
 }

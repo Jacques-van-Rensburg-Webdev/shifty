@@ -7,12 +7,14 @@ import { MONTHS, addMonths, endOfMonth, formatMonth, toKey, today } from '../dat
 import { formatEuro, formatHours, formatMinusEuro, formatPercent } from '../format.js';
 import { RATE_LABELS, deductions } from '../deductions.js';
 import { monthPay } from '../pay-calc.js';
+import { monthProjection } from '../month-projection.js';
 import { getSettings, getShifts, updateSettings } from '../storage.js';
 import { getViewMonth, setViewMonth } from '../view-month.js';
 import { periodNav } from '../components/period-nav.js';
 import { saveField } from '../components/save-field.js';
 import { moneyCard, payTotal } from '../components/money-card.js';
 import { completedShifts } from '../components/completed-shifts.js';
+import { renderProjection } from '../components/projection.js';
 
 const round2 = (v) => Math.round(v * 100) / 100;
 const groupLabel = (text) => el('h3', { class: 'group-label span-4', text });
@@ -78,6 +80,7 @@ export function render(container) {
   const prevKey = toKey(prev).slice(0, 7);
   const gross = grossByMonth[prevKey] ?? null;
   const pay = monthPay(getShifts(), toKey(month), toKey(endOfMonth(month)), settings);
+  const projection = monthProjection(getShifts(), toKey(month), toKey(endOfMonth(month)), settings);
 
   container.append(el('div', { class: 'grid' }, [
     el('h2', { class: 'section-title span-4', text: 'Pay' }),
@@ -109,6 +112,8 @@ export function render(container) {
       { label: 'Hours worked', value: formatHours(pay.minutes) },
       { label: 'Non-tip hours', value: formatHours(pay.nonTip) },
     ]),
+
+    ...renderProjection({ projection, completedTotal: pay.total, monthName, rate, tipPercent }),
 
     groupLabel('Deductions'),
     ...saveField({
