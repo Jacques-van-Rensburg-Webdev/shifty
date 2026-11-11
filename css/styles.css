@@ -271,7 +271,7 @@ button { cursor: pointer; }
     inset calc(var(--border-rule) * -1) calc(var(--border-rule) * -1) 0 var(--bevel-color-dark);
 }
 .button-accent:active, .button-edit:active, .button-delete:active, .button-complete:active,
-.button-complete[aria-pressed="true"] {
+.button-edit[aria-pressed="true"], .button-complete[aria-pressed="true"] {
   box-shadow:
     inset var(--border-rule) var(--border-rule) 0 var(--bevel-color-dark),
     inset calc(var(--border-rule) * -1) calc(var(--border-rule) * -1) 0 var(--bevel-color-light);
@@ -582,9 +582,6 @@ select.input {
   line-height: var(--leading-sm);
   color: var(--color-text-muted);
 }
-
-/* Estimated tips: amount, then what it's based on underneath */
-.day-shift-estimate { display: flex; flex-direction: column; }
 
 /* ---------- "So far" totals: 56pt rows ---------- */
 .sofar-card {

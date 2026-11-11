@@ -1,5 +1,6 @@
-// Pay screen: hourly rate, estimated pay and its breakdown, the deductions estimate
-// from last month's gross, the tips deduction and the month's completed shifts.
+// Pay screen: hourly rate, estimated pay and its breakdown, the month's projection, the deductions
+// estimate from last month's gross (the only place each contribution is listed), the tips deduction
+// setting and the month's completed shifts.
 // The month shown is kept in memory (view-month.js) while you switch tabs.
 
 import { el, redraw } from '../dom.js';
@@ -21,22 +22,12 @@ const groupLabel = (text) => el('h3', { class: 'group-label span-4', text });
 const note = (text) => el('p', { class: 'sofar-note span-4', text });
 const BAND_LABELS = { mini: 'Minijob', midi: 'Übergangsbereich' };
 
-// Every payslip deduction on this month's base pay, under one heading with its total.
-function deductionGroup(ded, rate) {
-  const amount = (value) => (rate ? formatMinusEuro(value) : '—');
-  let note;
-  if (rate) note = ded.band === 'mini' ? 'Minijob: none' : 'estimate';
-  return [
-    { label: 'Tax and other deductions', note, noteBelow: Boolean(note), value: amount(ded.total) },
-    { label: 'Lohnsteuer', note: RATE_LABELS.lst, value: amount(ded.lst), kind: 'sub' },
-    { label: 'Krankenversicherung', note: RATE_LABELS.kv, value: amount(ded.kv), kind: 'sub' },
-    { label: 'Rentenversicherung', note: RATE_LABELS.rv, value: amount(ded.rv), kind: 'sub' },
-    { label: 'Arbeitslosenversicherung', note: RATE_LABELS.av, value: amount(ded.av), kind: 'sub' },
-    { label: 'Pflegeversicherung', note: RATE_LABELS.pv, value: amount(ded.pv), kind: 'sub' },
-  ];
-}
-
+// Base pay, the deductions total (each contribution is listed in the Deductions card), tips and
+// the tips deduction, then the total.
 function breakdownRows(pay, rate, tipPercent) {
+  const ded = pay.deductions;
+  let dedNote = null;
+  if (rate) dedNote = ded.band === 'mini' ? 'Minijob: none' : 'estimate';
   return [
     {
       label: 'Base pay',
@@ -44,11 +35,9 @@ function breakdownRows(pay, rate, tipPercent) {
       noteBelow: true,
       value: rate ? formatEuro(pay.base) : 'Set rate',
     },
-    ...deductionGroup(pay.deductions, rate),
-    { label: 'Net base pay', value: rate ? formatEuro(pay.netBase) : '—' },
-    { label: 'Tips', note: '(completed shifts)', value: formatEuro(pay.tips) },
+    { label: 'Tax and other deductions', note: dedNote, value: rate ? formatMinusEuro(ded.total) : '—', kind: 'sub' },
+    { label: 'Tips', value: formatEuro(pay.tips) },
     { label: 'Tips deduction', note: formatPercent(tipPercent), value: formatMinusEuro(pay.tipDeduction), kind: 'sub' },
-    { label: 'Tips after deduction', value: formatEuro(pay.tipsNet) },
     { label: 'Total estimated pay', value: formatEuro(pay.total), kind: 'total' },
   ];
 }
@@ -102,18 +91,12 @@ export function render(container) {
       label: `Estimated pay, ${monthName}`,
       value: formatEuro(pay.total),
       note: rate
-        ? `${formatEuro(rate)}/h × ${formatHours(pay.minutes)} − tax and other deductions + tips after deduction`
+        ? `${formatHours(pay.minutes)} completed at ${formatEuro(rate)}/h`
         : 'Tips only. Add your hourly rate to include base pay.',
     }),
-
-    groupLabel('Estimated pay breakdown'),
     moneyCard(breakdownRows(pay, rate, tipPercent)),
-    moneyCard([
-      { label: 'Hours worked', value: formatHours(pay.minutes) },
-      { label: 'Non-tip hours', value: formatHours(pay.nonTip) },
-    ]),
 
-    ...renderProjection({ projection, completedTotal: pay.total, monthName, rate, tipPercent }),
+    ...renderProjection({ projection, completedTotal: pay.total, monthName, rate }),
 
     groupLabel('Deductions'),
     ...saveField({
@@ -138,15 +121,9 @@ export function render(container) {
       decimals: null,
       placeholder: '5',
     }),
-    moneyCard([
-      { label: `Tips earned, ${monthName}`, value: formatEuro(pay.tips) },
-      { label: 'Deduction', note: formatPercent(tipPercent), value: formatMinusEuro(pay.tipDeduction) },
-      { label: 'Tips after deduction', value: formatEuro(pay.tipsNet), kind: 'net' },
-    ]),
-    note('Taken off your tips before they are added to your estimated pay.'),
 
     groupLabel('Completed shifts'),
     completedShifts(pay.rows, toKey(today())),
-    note('Pay is an estimate: completed hours × your hourly rate, less estimated deductions, plus tips after the tips deduction. Check your payslip for the real figures.'),
+    note('Estimates only. Check your payslip for the real figures.'),
   ]));
 }

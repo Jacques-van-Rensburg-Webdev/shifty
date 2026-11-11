@@ -1,5 +1,5 @@
 // Calendar screen: Month / Week toggle, navigation, the month grid or week list,
-// the selected day panel and the "so far" totals.
+// the selected day (card, Add / Edit / Delete; Edit opens the logging rows) and the "so far" totals.
 // View and selected day are kept in memory while you move between screens.
 
 import { el, redraw } from '../dom.js';
@@ -17,7 +17,7 @@ import { periodNav } from '../components/period-nav.js';
 import { buildSummaryPdf } from '../pdf/summary-pdf.js';
 import { sharePdf } from '../pdf/share.js';
 
-const state = { view: 'month', selectedKey: null };
+const state = { view: 'month', selectedKey: null, logOpen: false };
 
 // Used by the shift form to return here with the saved day selected.
 export function selectDay(key) {
@@ -37,7 +37,11 @@ export function render(container) {
   const first = isMonth ? startOfMonth(selected) : startOfWeek(selected);
   const last = isMonth ? endOfMonth(selected) : addDays(first, 6);
 
-  const select = (key) => { state.selectedKey = key; rerender(); };
+  const select = (key) => {
+    if (key !== state.selectedKey) state.logOpen = false;
+    state.selectedKey = key;
+    rerender();
+  };
   const move = (step) => select(toKey(isMonth ? addMonths(selected, step) : addDays(selected, step * 7)));
 
   const viewButton = (view, label) => el('button', {
@@ -90,7 +94,13 @@ export function render(container) {
       onMove: move,
     }),
     ...view,
-    ...renderDayPanel({ key: state.selectedKey, todayKey, heading: 'Selected day', onChange: rerender }),
+    ...renderDayPanel({
+      key: state.selectedKey,
+      todayKey,
+      heading: 'Selected day',
+      onChange: rerender,
+      collapsed: { open: state.logOpen, onToggle: () => { state.logOpen = !state.logOpen; rerender(); } },
+    }),
     ...renderSoFar({
       heading: isMonth ? `${MONTHS[selected.getMonth()]} so far` : 'This week so far',
       totals: totals(shifts, toKey(first), toKey(last), todayKey),

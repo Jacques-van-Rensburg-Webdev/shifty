@@ -1,4 +1,4 @@
-// The day panel's time rows: Started (Start), Ended (End), and Bar opened at or Bar closed at.
+// The day panel's time rows: Started (Start), Bar opened at or Bar closed at, and Ended (End).
 // Each returns grid children: a label (columns 1–4), a time field (1–2) and a button (3–4).
 // A time typed but not saved yet is kept as a draft (see drafts.js) until its button saves it.
 

@@ -3,7 +3,7 @@
 // offline, the saved copy is used. Only this app's own files are handled.
 // When adding a file to the app, add it to APP_FILES so it's available offline from the first visit.
 
-const CACHE = 'shifty-v9';
+const CACHE = 'shifty-v12';
 
 const APP_FILES = [
   './',

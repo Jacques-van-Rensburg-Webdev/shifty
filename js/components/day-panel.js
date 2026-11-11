@@ -1,6 +1,7 @@
-// A day's shift: day card, Add or Edit / Delete, then Started, Ended, the bar row and Tips.
-// A meeting has no bar row and no tips.
-// Returns grid children (each carries its own span). Used by the Calendar and Home.
+// A day's shift: day card, Add or Edit / Delete, then the logging rows: Started, the bar row,
+// Ended and Tips. A meeting has no bar row and no tips. On Home the rows are always shown; on the
+// Calendar they are collapsed and the Edit button opens them (with an "Edit shift details" button
+// for the shift form). Returns grid children (each carries its own span).
 
 import { el } from '../dom.js';
 import { icon } from '../icons.js';
@@ -39,10 +40,10 @@ function dayCard(key, shift, todayKey, showDate) {
       shift.tips > 0 && el('span', { class: 'day-shift-extra', text: `Tips ${formatEuro(shift.tips)}` }),
       shift.barOpen && el('span', { class: 'day-shift-extra', text: `Bar opened ${shift.barOpen}` }),
       shift.barClose && el('span', { class: 'day-shift-extra', text: `Bar closed ${shift.barClose}` }),
-      estimate && el('span', { class: 'day-shift-extra day-shift-estimate' }, [
-        el('span', { text: `Estimated tips ${formatEuro(estimate.amount)}` }),
-        el('span', { text: estimate.label }),
-      ]),
+      estimate && el('span', {
+        class: 'day-shift-extra',
+        text: `Estimated tips ≈ ${formatEuro(estimate.amount)} · ${estimate.label.replace('average of ', '')}`,
+      }),
     ]
     : [el('span', { class: 'day-card-off', text: 'No shift' })];
 
@@ -52,8 +53,11 @@ function dayCard(key, shift, todayKey, showDate) {
   ]);
 }
 
+const editHash = (key, back) => `#/shift/edit/${key}${back}`;
+
 // from: the screen the shift form returns to ('home'); the Calendar by default.
-function actions(key, shift, onChange, from) {
+// collapsed: { open, onToggle } makes Edit open and close the logging rows instead of the form.
+function actions(key, shift, onChange, from, collapsed) {
   const back = from ? `/${from}` : '';
   if (!shift) {
     return [el('button', {
@@ -63,13 +67,24 @@ function actions(key, shift, onChange, from) {
       onClick: () => { window.location.hash = `#/shift/new/${key}${back}`; },
     })];
   }
-  return [
-    el('button', {
+  const edit = collapsed
+    ? el('button', {
       type: 'button',
       class: 'button button-edit button-block span-2',
       'aria-label': 'Edit shift',
-      onClick: () => { window.location.hash = `#/shift/edit/${key}${back}`; },
-    }, [icon('edit')]),
+      'aria-pressed': String(collapsed.open),
+      'aria-expanded': String(collapsed.open),
+      'data-focus-key': 'edit-toggle',
+      onClick: collapsed.onToggle,
+    }, [icon('edit')])
+    : el('button', {
+      type: 'button',
+      class: 'button button-edit button-block span-2',
+      'aria-label': 'Edit shift',
+      onClick: () => { window.location.hash = editHash(key, back); },
+    }, [icon('edit')]);
+  return [
+    edit,
     el('button', {
       type: 'button',
       class: 'button button-delete button-block span-2',
@@ -122,17 +137,34 @@ function tipsRow(key, shift, onChange) {
 }
 
 // Started and Ended show the current time until they're logged.
+// collapsed: { open, onToggle } (Calendar) hides the logging rows until Edit is tapped; the opened
+// rows end with an "Edit shift details" button for the shift form. Without it (Home), the rows
+// are always shown and Edit opens the form.
 // live: fill the bar row with the current time (today by default).
 // showDate: show the date in the day card. from: where the shift form returns to.
-export function renderDayPanel({ key, todayKey, heading, onChange, from, showDate = true, live = key === todayKey }) {
+export function renderDayPanel({
+  key, todayKey, heading, onChange, from, collapsed = null, showDate = true, live = key === todayKey,
+}) {
   const shift = getShift(key);
+  const showRows = !collapsed || (collapsed.open && shift);
+  const rows = showRows
+    ? [
+      ...startedRow(key, shift, onChange),
+      ...barRow(key, shift, live, onChange),
+      ...endedRow(key, shift, onChange),
+      ...(!shift || hasTips(shift) ? tipsRow(key, shift, onChange) : []),
+      collapsed && el('button', {
+        type: 'button',
+        class: 'button button-block span-4',
+        text: 'Edit shift details',
+        onClick: () => { window.location.hash = editHash(key, from ? `/${from}` : ''); },
+      }),
+    ]
+    : [];
   return [
     el('h3', { class: 'group-label span-4', text: heading }),
     dayCard(key, shift, todayKey, showDate),
-    ...actions(key, shift, onChange, from),
-    ...startedRow(key, shift, onChange),
-    ...endedRow(key, shift, onChange),
-    ...barRow(key, shift, live, onChange),
-    ...(!shift || hasTips(shift) ? tipsRow(key, shift, onChange) : []),
+    ...actions(key, shift, onChange, from, collapsed),
+    ...rows,
   ];
 }

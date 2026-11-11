@@ -1,4 +1,5 @@
 // "So far" totals card: hours worked, shifts, tips earned, non-tip hours.
+// Hours and shifts count completed shifts only; tips count as soon as they are added.
 
 import { el } from '../dom.js';
 import { formatEuro, formatHours } from '../format.js';
@@ -17,9 +18,5 @@ export function renderSoFar({ heading, totals }) {
       row('Tips earned', formatEuro(totals.tips)),
       row('Non-tip hours', formatHours(totals.nonTip)),
     ]),
-    el('p', {
-      class: 'sofar-note span-4',
-      text: 'Hours and shifts count completed shifts only; tips count as soon as they are added.',
-    }),
   ];
 }

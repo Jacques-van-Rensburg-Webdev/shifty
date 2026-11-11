@@ -1,14 +1,13 @@
-// Home screen: today's date, the shift that's happening now (with the Calendar's actions),
-// this week's tips (earned and predicted) and the month's "so far" totals.
+// Home screen: today's date, the shift that's happening now (with the Calendar's actions)
+// and this week's tips (earned and predicted). Month totals are on the Calendar.
 // Until 06:00, yesterday's shift counts as "now" if it isn't completed and runs past midnight or
 // has no end yet (shifts are scheduled with a start time only).
 
 import { el, redraw } from '../dom.js';
-import { DAYS, MONTHS, addDays, endOfMonth, startOfMonth, toKey, today } from '../dates.js';
-import { endsNextDay, hasEnd, totals } from '../shifts.js';
+import { DAYS, MONTHS, addDays, toKey, today } from '../dates.js';
+import { endsNextDay, hasEnd } from '../shifts.js';
 import { getShift, getShifts } from '../storage.js';
 import { renderDayPanel } from '../components/day-panel.js';
-import { renderSoFar } from '../components/so-far.js';
 import { renderWeekTips } from '../components/week-tips.js';
 
 const LAST_NIGHT_UNTIL = 6; // hour
@@ -53,9 +52,5 @@ export function render(container) {
       live: true,
     }),
     ...renderWeekTips({ shifts: getShifts(), date: d, todayKey }),
-    ...renderSoFar({
-      heading: `${MONTHS[d.getMonth()]} so far`,
-      totals: totals(getShifts(), toKey(startOfMonth(d)), toKey(endOfMonth(d)), todayKey),
-    }),
   ]));
 }
