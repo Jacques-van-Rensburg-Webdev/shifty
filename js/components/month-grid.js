@@ -2,15 +2,16 @@
 // Each day cell is 72 tall: date 24, shift badge 24, start hour 16.
 
 import { el } from '../dom.js';
-import { MONTHS, WEEKDAY_INITIALS, daysInMonth, toKey } from '../dates.js';
-import { SHIFT_TYPES } from '../shifts.js';
+import { daysInMonth, monthName, toKey, weekdayInitials } from '../dates.js';
+import { typeName } from '../shifts.js';
 import { formatTimeRange } from '../format.js';
+import { t } from '../i18n.js';
 import { shiftBadge } from './shift-badge.js';
 
 function dayLabel(day, month, year, isToday, shift) {
-  let label = `${day} ${MONTHS[month]} ${year}`;
-  if (isToday) label += ', today';
-  if (shift) label += `, ${SHIFT_TYPES[shift.type]} ${formatTimeRange(shift)}`;
+  let label = `${day} ${monthName(month)} ${year}`;
+  if (isToday) label += `, ${t('aria.today')}`;
+  if (shift) label += `, ${typeName(shift.type)} ${formatTimeRange(shift)}`;
   return label;
 }
 
@@ -42,7 +43,7 @@ export function renderMonthGrid({ month, selectedKey, todayKey, shifts, onSelect
   while (cells.length % 7) cells.push(blank());
 
   return el('div', { class: 'cal span-4' }, [
-    el('div', { class: 'cal-head', 'aria-hidden': 'true' }, WEEKDAY_INITIALS.map((initial) => el('div', { text: initial }))),
+    el('div', { class: 'cal-head', 'aria-hidden': 'true' }, weekdayInitials().map((initial) => el('div', { text: initial }))),
     el('div', { class: 'cal-body' }, cells),
   ]);
 }

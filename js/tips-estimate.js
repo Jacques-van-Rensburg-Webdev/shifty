@@ -5,7 +5,7 @@
 import { hasTips } from './shifts.js';
 import { pastShifts } from './past-shifts.js';
 
-// -> { amount, count, label } e.g. label "average of 12 Thursday closing shifts", or null.
+// -> { amount, count, label } e.g. label "12 Thursday closing shifts", or null.
 export function estimateTips(shifts, key, shift) {
   if (shift.completed || !hasTips(shift)) return null;
   const past = pastShifts(shifts, key, shift);
@@ -15,6 +15,6 @@ export function estimateTips(shifts, key, shift) {
   return {
     amount: Math.round(perShift * 100) / 100,
     count: past.shifts.length,
-    label: `average of ${past.label}`,
+    label: past.label,
   };
 }

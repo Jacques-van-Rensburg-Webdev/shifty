@@ -1,4 +1,6 @@
 // Amounts typed by hand. No HTML here.
+
+import { decimalSeparator } from './format.js';
 // Money fields are text fields with the decimal pad (inputmode="decimal"), because Safari's
 // number fields reject the comma that a German iPhone keypad shows.
 
@@ -31,9 +33,10 @@ export function parseAmount(text) {
   return Number(whole.replace(/[.,]/g, '') + (decimals ? `.${decimals}` : ''));
 }
 
-// A saved number shown in a field with a comma: (14.5, 2) -> "14,50"; (2.5) -> "2,5"; null -> "".
+// A saved number shown in a field with the language's decimal separator:
+// (14.5, 2) -> "14,50" (de, es) or "14.50" (en); (2.5) -> "2,5"; null -> "".
 export function formatAmountInput(value, decimals = null) {
   if (value == null) return '';
   const text = decimals == null ? String(value) : value.toFixed(decimals);
-  return text.replace('.', ',');
+  return text.replace('.', decimalSeparator());
 }

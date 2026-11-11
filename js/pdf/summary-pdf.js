@@ -4,8 +4,9 @@
 
 import { createPdf, PAGE } from './pdf-writer.js';
 import { formatLongDay, formatShortDay, fromKey, today } from '../dates.js';
-import { SHIFT_TYPES, hasEnd, shiftMinutes, totals } from '../shifts.js';
+import { hasEnd, shiftMinutes, totals, typeName } from '../shifts.js';
 import { formatEuro, formatHours, formatMinusEuro, formatPercent, formatTimeRange } from '../format.js';
+import { t } from '../i18n.js';
 
 const INK = '#16161a';
 const RED = '#d61c1c';
@@ -18,24 +19,24 @@ const RIGHT = PAGE.width - MARGIN;
 const ROW = 18;
 const BOTTOM = PAGE.height - MARGIN - 20; // room for the footer
 
-// Shift table columns: [heading, x]
-const COLUMNS = [['Date', 0], ['Type', 72], ['Time', 132], ['Length', 210], ['Status', 262], ['Tips', 330], ['Bar', 400]];
+// Shift table columns: [heading key, x]
+const COLUMNS = [['date', 0], ['type', 72], ['time', 132], ['length', 210], ['status', 262], ['tips', 330], ['bar', 400]];
 
 // "open 11:20", "close 01:30" or "–".
 function barText(shift) {
-  if (shift.barOpen) return `open ${shift.barOpen}`;
-  return shift.barClose ? `close ${shift.barClose}` : '–';
+  if (shift.barOpen) return t('pdf.barOpen', { time: shift.barOpen });
+  return shift.barClose ? t('pdf.barClose', { time: shift.barClose }) : '–';
 }
 
 const status = (shift) => {
-  if (shift.completed) return 'Completed';
-  return shift.started ? 'Started' : 'Planned';
+  if (shift.completed) return t('status.completed');
+  return shift.started ? t('status.started') : t('status.planned');
 };
 
 function shiftCells(key, shift) {
   return [
     formatShortDay(fromKey(key)),
-    SHIFT_TYPES[shift.type],
+    typeName(shift.type),
     formatTimeRange(shift),
     hasEnd(shift) ? formatHours(shiftMinutes(shift)) : '–',
     status(shift),
@@ -62,7 +63,7 @@ export function buildSummaryPdf({ title, firstKey, lastKey, todayKey, shifts, em
   page.rect(MARGIN, y + 4, RIGHT - MARGIN, 4, RED_DARK);
   y += 22;
   const made = today();
-  page.text(MARGIN, y, `Made ${formatLongDay(made)} ${made.getFullYear()}`, { size: 9, color: MUTED });
+  page.text(MARGIN, y, t('pdf.made', { date: `${formatLongDay(made)} ${made.getFullYear()}` }), { size: 9, color: MUTED });
 
   const heading = (text) => {
     y += 30;
@@ -71,31 +72,31 @@ export function buildSummaryPdf({ title, firstKey, lastKey, todayKey, shifts, em
   };
 
   // ---------- So far
-  heading('So far');
-  const t = totals(shifts, firstKey, lastKey, todayKey);
+  heading(t('pdf.soFar'));
+  const sums = totals(shifts, firstKey, lastKey, todayKey);
   // The tips deduction, worked out as on Pay (pay-calc.js), from the tips earned shown here.
-  const tipDeduction = round2((t.tips * tipPercent) / 100);
-  [['Hours worked', formatHours(t.minutes)], ['Shifts', String(t.count)], ['Tips earned', formatEuro(t.tips)],
-    [`Tips deduction (${formatPercent(tipPercent)})`, formatMinusEuro(tipDeduction)],
-    ['Tips after deduction', formatEuro(round2(t.tips - tipDeduction))],
-    ['Non-tip hours', formatHours(t.nonTip)]].forEach(([label, value]) => {
+  const tipDeduction = round2((sums.tips * tipPercent) / 100);
+  [[t('soFar.hours'), formatHours(sums.minutes)], [t('soFar.shifts'), String(sums.count)], [t('soFar.tips'), formatEuro(sums.tips)],
+    [t('pdf.tipDeduction', { percent: formatPercent(tipPercent) }), formatMinusEuro(tipDeduction)],
+    [t('pdf.tipsAfter'), formatEuro(round2(sums.tips - tipDeduction))],
+    [t('soFar.nonTip'), formatHours(sums.nonTip)]].forEach(([label, value]) => {
     y += ROW;
     page.text(MARGIN, y - 5, label, { size: 10, bold: true, color: INK });
     page.text(MARGIN + 240, y - 5, value, { size: 10, color: INK, align: 'right' });
     page.line(MARGIN, y, MARGIN + 240, y, { color: RULE });
   });
   y += 16;
-  page.text(MARGIN, y, 'Hours and shifts count completed shifts up to today; tips count as soon as they are added.', { size: 8, color: MUTED });
+  page.text(MARGIN, y, t('pdf.note'), { size: 8, color: MUTED });
 
   // ---------- Shifts
-  heading('Shifts');
+  heading(t('pdf.shifts'));
   const entries = Object.entries(shifts)
     .filter(([key]) => key >= firstKey && key <= lastKey)
     .sort(([a], [b]) => a.localeCompare(b));
 
   const tableHead = () => {
     y += ROW;
-    COLUMNS.forEach(([name, x]) => page.text(MARGIN + x, y - 5, name.toUpperCase(), { size: 8, bold: true, color: INK }));
+    COLUMNS.forEach(([name, x]) => page.text(MARGIN + x, y - 5, t(`pdf.col.${name}`).toUpperCase(), { size: 8, bold: true, color: INK }));
     page.line(MARGIN, y, RIGHT, y, { width: 1, color: INK });
   };
 
@@ -108,7 +109,7 @@ export function buildSummaryPdf({ title, firstKey, lastKey, todayKey, shifts, em
       if (y + ROW > BOTTOM) {
         page = pdf.addPage();
         y = MARGIN + 10;
-        page.text(MARGIN, y, `${fullTitle} (continued)`, { size: 9, bold: true, color: MUTED });
+        page.text(MARGIN, y, `${fullTitle} ${t('pdf.continued')}`, { size: 9, bold: true, color: MUTED });
         y += 8;
         tableHead();
       }

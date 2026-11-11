@@ -7,6 +7,7 @@ import { updateShift } from '../storage.js';
 import { barKind } from '../shifts.js';
 import { currentTime, keepCurrent } from '../live-time.js';
 import { clearDraft, getDraft, setDraft } from '../drafts.js';
+import { t } from '../i18n.js';
 import { pickerField } from './picker-field.js';
 
 const fieldLabel = (id, text) => el('label', { class: 'field-label span-4', for: id, text });
@@ -44,7 +45,7 @@ export function startedRow(key, shift, onChange) {
     'aria-pressed': String(started),
     'data-focus-key': 'log-start',
     disabled: !shift || (!started && !canStart()),
-    text: started ? 'Started' : 'Start',
+    text: started ? t('btn.started') : t('btn.start'),
     onClick: () => {
       if (started) {
         updateShift(key, { started: false, start: shift.plannedStart ?? shift.start, plannedStart: null });
@@ -56,7 +57,7 @@ export function startedRow(key, shift, onChange) {
     },
   });
   if (shift && !started) input.addEventListener('input', () => { button.disabled = !canStart(); });
-  return [fieldLabel('start-time', 'Started'), pickerField(input), button];
+  return [fieldLabel('start-time', t('row.started')), pickerField(input), button];
 }
 
 // End sets the end time and completes the shift (any planned end is kept). Tapping Ended undoes it.
@@ -71,7 +72,7 @@ export function endedRow(key, shift, onChange) {
     'aria-pressed': String(completed),
     'data-focus-key': 'log-complete',
     disabled: !shift || (!completed && !canEnd()),
-    text: completed ? 'Ended' : 'End',
+    text: completed ? t('btn.ended') : t('btn.end'),
     onClick: () => {
       if (completed) {
         updateShift(key, { completed: false, end: shift.plannedEnd ?? null, plannedEnd: null });
@@ -83,13 +84,13 @@ export function endedRow(key, shift, onChange) {
     },
   });
   if (shift && !completed) input.addEventListener('input', () => { button.disabled = !canEnd(); });
-  return [fieldLabel('finish-time', 'Ended'), pickerField(input), button];
+  return [fieldLabel('finish-time', t('row.ended')), pickerField(input), button];
 }
 
 // Bar opened at (Opening) or Bar closed at (Closing, Other); a meeting has neither.
 const BAR_ROWS = {
-  open: { field: 'barOpen', label: 'Bar opened at', log: 'Log bar open', update: 'Update open' },
-  close: { field: 'barClose', label: 'Bar closed at', log: 'Log bar close', update: 'Update close' },
+  open: { field: 'barOpen', label: 'bar.openedAt', log: 'bar.logOpen', update: 'bar.updateOpen' },
+  close: { field: 'barClose', label: 'bar.closedAt', log: 'bar.logClose', update: 'bar.updateClose' },
 };
 
 // Shows a typed draft, else the saved bar time; if none yet, the current time when live (today),
@@ -107,7 +108,7 @@ export function barRow(key, shift, isLive, onChange) {
     class: 'button button-primary button-compact button-block span-2',
     'data-focus-key': 'bar-time',
     disabled: !shift,
-    text: saved ? row.update : row.log,
+    text: t(saved ? row.update : row.log),
     onClick: () => {
       const time = input.value || fallback;
       if (!time) return;
@@ -115,5 +116,5 @@ export function barRow(key, shift, isLive, onChange) {
       onChange();
     },
   });
-  return [fieldLabel('bar-time', row.label), pickerField(input), button];
+  return [fieldLabel('bar-time', t(row.label)), pickerField(input), button];
 }

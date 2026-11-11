@@ -1,5 +1,6 @@
 import { initRouter } from './router.js';
 import { initTabbar } from './tabbar.js';
+import { initLanguage } from './i18n.js';
 
 // Service worker for offline use (browsers only allow it on https and localhost).
 function registerServiceWorker() {
@@ -10,6 +11,7 @@ function registerServiceWorker() {
 }
 
 function init() {
+  initLanguage(); // before the first render: sets <html lang> and the tab labels
   initRouter();
   initTabbar();
   registerServiceWorker();

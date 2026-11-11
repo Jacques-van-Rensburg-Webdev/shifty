@@ -4,11 +4,12 @@
 
 import { el, redraw } from '../dom.js';
 import {
-  MONTHS, addDays, addMonths, endOfMonth, formatMonth, formatRange, fromKey,
+  addDays, addMonths, endOfMonth, formatMonth, formatRange, fromKey, monthName,
   startOfMonth, startOfWeek, toKey, today,
 } from '../dates.js';
 import { totals } from '../shifts.js';
 import { getSettings, getShifts } from '../storage.js';
+import { t } from '../i18n.js';
 import { renderMonthGrid } from '../components/month-grid.js';
 import { renderWeekList } from '../components/week-list.js';
 import { renderDayPanel } from '../components/day-panel.js';
@@ -33,7 +34,6 @@ export function render(container) {
   const shifts = getShifts();
   const selected = fromKey(state.selectedKey);
   const isMonth = state.view === 'month';
-  const unit = isMonth ? 'month' : 'week';
   const first = isMonth ? startOfMonth(selected) : startOfWeek(selected);
   const last = isMonth ? endOfMonth(selected) : addDays(first, 6);
 
@@ -58,7 +58,7 @@ export function render(container) {
   const summaryButton = () => el('button', {
     type: 'button',
     class: 'button button-block button-outline-accent span-4',
-    text: `Save ${unit} summary (PDF)`,
+    text: isMonth ? t('calendar.saveMonthPdf') : t('calendar.saveWeekPdf'),
     onClick: () => {
       const title = isMonth ? formatMonth(selected) : `${formatRange(first, last)} ${last.getFullYear()}`;
       const { bytes } = buildSummaryPdf({
@@ -67,7 +67,7 @@ export function render(container) {
         lastKey: toKey(last),
         todayKey,
         shifts,
-        emptyText: `No shifts this ${unit}`,
+        emptyText: isMonth ? t('calendar.emptyMonth') : t('calendar.emptyWeek'),
         tipPercent: getSettings().tipPercent,
       });
       const fileName = isMonth ? `shifty-${toKey(first).slice(0, 7)}.pdf` : `shifty-week-${toKey(first)}.pdf`;
@@ -84,12 +84,13 @@ export function render(container) {
   ];
 
   container.append(el('div', { class: 'grid' }, [
-    el('h2', { class: 'section-title span-4', text: 'Calendar' }),
-    viewButton('month', 'Month'),
-    viewButton('week', 'Week'),
+    el('h2', { class: 'section-title span-4', text: t('calendar.title') }),
+    viewButton('month', t('view.month')),
+    viewButton('week', t('view.week')),
     ...periodNav({
       label: isMonth ? formatMonth(selected) : formatRange(first, last),
-      unit,
+      prevLabel: t(isMonth ? 'nav.prevMonth' : 'nav.prevWeek'),
+      nextLabel: t(isMonth ? 'nav.nextMonth' : 'nav.nextWeek'),
       isRange: !isMonth,
       onMove: move,
     }),
@@ -97,12 +98,12 @@ export function render(container) {
     ...renderDayPanel({
       key: state.selectedKey,
       todayKey,
-      heading: 'Selected day',
+      heading: t('day.selected'),
       onChange: rerender,
       collapsed: { open: state.logOpen, onToggle: () => { state.logOpen = !state.logOpen; rerender(); } },
     }),
     ...renderSoFar({
-      heading: isMonth ? `${MONTHS[selected.getMonth()]} so far` : 'This week so far',
+      heading: isMonth ? t('soFar.month', { month: monthName(selected.getMonth()) }) : t('soFar.week'),
       totals: totals(shifts, toKey(first), toKey(last), todayKey),
     }),
   ]));

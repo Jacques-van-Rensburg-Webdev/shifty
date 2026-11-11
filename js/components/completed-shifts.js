@@ -4,6 +4,7 @@ import { el } from '../dom.js';
 import { formatShortDay, fromKey } from '../dates.js';
 import { shiftMinutes } from '../shifts.js';
 import { formatEuro, formatHours, formatTimeRange } from '../format.js';
+import { t } from '../i18n.js';
 import { shiftBadge } from './shift-badge.js';
 
 export function completedShifts(rows, todayKey) {
@@ -18,10 +19,13 @@ export function completedShifts(rows, todayKey) {
       ]),
       el('span', { class: 'pay-shift-nums' }, [
         el('span', { class: 'sofar-value', text: formatHours(shiftMinutes(shift)) }),
-        el('span', { class: 'pay-shift-detail', text: shift.tips > 0 ? `Tips ${formatEuro(shift.tips)}` : 'No tips' }),
+        el('span', {
+          class: 'pay-shift-detail',
+          text: shift.tips > 0 ? t('completed.tips', { amount: formatEuro(shift.tips) }) : t('completed.noTips'),
+        }),
       ]),
     ]))
-    : [el('div', { class: 'sofar-row' }, [el('span', { class: 'day-card-off', text: 'No completed shifts this month' })])];
+    : [el('div', { class: 'sofar-row' }, [el('span', { class: 'day-card-off', text: t('completed.none') })])];
 
   return el('div', { class: 'sofar-card span-4' }, content);
 }

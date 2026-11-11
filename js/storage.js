@@ -1,10 +1,10 @@
 // Data saved in localStorage on this device. If storage is blocked, changes still work for this session.
 // Shifts, one per day: { 'YYYY-MM-DD': shift }.
-// Settings: { rate, tipPercent, grossByMonth: { 'YYYY-MM': gross } }.
+// Settings: { rate, tipPercent, grossByMonth: { 'YYYY-MM': gross }, language: 'en' | 'de' | 'es' | null }.
 
 const SHIFTS_KEY = 'shifty-shifts';
 const SETTINGS_KEY = 'shifty-settings';
-const DEFAULT_SETTINGS = { rate: 0, tipPercent: 5, grossByMonth: {} };
+const DEFAULT_SETTINGS = { rate: 0, tipPercent: 5, grossByMonth: {}, language: null };
 
 let shifts = null;
 let settings = null;

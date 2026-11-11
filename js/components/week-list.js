@@ -2,8 +2,9 @@
 
 import { el } from '../dom.js';
 import { addDays, formatShortDay, toKey } from '../dates.js';
-import { SHIFT_TYPES } from '../shifts.js';
+import { typeName } from '../shifts.js';
 import { formatTimeRange } from '../format.js';
+import { t } from '../i18n.js';
 import { shiftBadge } from './shift-badge.js';
 
 export function renderWeekList({ weekStart, selectedKey, todayKey, shifts, onSelect }) {
@@ -15,13 +16,13 @@ export function renderWeekList({ weekStart, selectedKey, todayKey, shifts, onSel
     const isToday = key === todayKey;
     const isSelected = key === selectedKey;
     const label = formatShortDay(date);
-    const summary = shift ? `${SHIFT_TYPES[shift.type]} ${formatTimeRange(shift)}` : 'off';
+    const summary = shift ? `${typeName(shift.type)} ${formatTimeRange(shift)}` : t('week.off');
 
     rows.push(el('button', {
       type: 'button',
       class: ['week-row', isToday && 'is-today', isSelected && 'is-selected'].filter(Boolean).join(' '),
       'aria-pressed': String(isSelected),
-      'aria-label': `${label}${isToday ? ', today' : ''}, ${summary}`,
+      'aria-label': `${label}${isToday ? `, ${t('aria.today')}` : ''}, ${summary}`,
       'data-focus-key': `day-${key}`,
       onClick: () => onSelect(key),
     }, [
@@ -30,11 +31,11 @@ export function renderWeekList({ weekStart, selectedKey, todayKey, shifts, onSel
         ? el('span', { class: 'week-shift' }, [
           shiftBadge(key, shift, todayKey),
           el('span', { class: 'week-shift-text' }, [
-            el('span', { class: 'week-type', text: SHIFT_TYPES[shift.type] }),
+            el('span', { class: 'week-type', text: typeName(shift.type) }),
             el('span', { class: 'week-time', text: formatTimeRange(shift) }),
           ]),
         ])
-        : el('span', { class: 'week-off', text: 'Off' }),
+        : el('span', { class: 'week-off', text: t('week.off') }),
     ]));
   }
   return el('div', { class: 'week-card span-4' }, rows);

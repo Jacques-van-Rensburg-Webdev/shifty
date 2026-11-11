@@ -53,6 +53,14 @@ button { cursor: pointer; }
   font-weight: var(--weight-bold);
   text-transform: uppercase;
 }
+/* Language key on the right of the header: 48 × 48 ink key showing EN / DE / ES */
+.lang-button {
+  margin-left: auto;
+  min-width: var(--size-tap);
+  padding-inline: var(--space-1);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+}
 
 /* Content leaves room for the fixed tab bar so nothing hides under it */
 .app-content {

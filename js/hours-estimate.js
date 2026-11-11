@@ -5,13 +5,14 @@
 import { hasEnd, shiftMinutes } from './shifts.js';
 import { pastShifts } from './past-shifts.js';
 
-// -> { minutes, label } e.g. label "average of 12 Friday closing shifts", or null.
+// -> { minutes, label } where label names the shifts averaged ("12 Friday closing shifts"), or is
+//    null for a planned end; null when there is nothing to estimate from.
 export function estimateMinutes(shifts, key, shift) {
   if (shift.completed) return null;
-  if (hasEnd(shift)) return { minutes: shiftMinutes(shift), label: 'planned end' };
+  if (hasEnd(shift)) return { minutes: shiftMinutes(shift), label: null };
   const past = pastShifts(shifts, key, shift);
   if (!past) return null;
 
   const average = past.shifts.reduce((sum, s) => sum + shiftMinutes(s), 0) / past.shifts.length;
-  return { minutes: Math.round(average), label: `average of ${past.label}` };
+  return { minutes: Math.round(average), label: past.label };
 }

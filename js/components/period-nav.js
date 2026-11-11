@@ -3,12 +3,12 @@
 import { el } from '../dom.js';
 import { icon } from '../icons.js';
 
-// unit: 'month' or 'week' (for the button labels); onMove(-1 | 1).
-export function periodNav({ label, unit, isRange = false, onMove }) {
+// prevLabel / nextLabel: the buttons' accessible names ("Previous month"); onMove(-1 | 1).
+export function periodNav({ label, prevLabel, nextLabel, isRange = false, onMove }) {
   const button = (step) => el('button', {
     type: 'button',
     class: `button nav-button span-1${step > 0 ? ' nav-button-end' : ''}`,
-    'aria-label': `${step > 0 ? 'Next' : 'Previous'} ${unit}`,
+    'aria-label': step > 0 ? nextLabel : prevLabel,
     'data-focus-key': `nav-${step}`,
     onClick: () => onMove(step),
   }, [icon(step > 0 ? 'next' : 'prev')]);

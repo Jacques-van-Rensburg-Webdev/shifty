@@ -2,6 +2,8 @@
 
 Plan shifts, log tips and estimate pay. Mobile web app, no build step.
 
+In English, German or Spanish: the EN / DE / ES key in the header switches (each tap moves to the next). The first time, the phone's language is used. Numbers and dates follow the language; German payroll terms stay German.
+
 ## Run it
 
 No build step. Open `index.html` in a browser, or serve the folder so ES modules load:

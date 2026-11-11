@@ -5,7 +5,11 @@
 // always have one). Older shifts may have a planned end.
 // If end is at or before start, the shift runs past midnight; it belongs to the day it starts.
 
-export const SHIFT_TYPES = { C: 'Closing', O: 'Opening', X: 'Other', M: 'Meeting' };
+import { t } from './i18n.js';
+
+// Type codes, in the order the shift form lists them; typeName gives the current language's name.
+export const TYPE_CODES = ['C', 'O', 'X', 'M'];
+export const typeName = (code) => t(`type.${code}`);
 
 // Start time filled in when adding a shift of each type (a meeting has none).
 export const DEFAULT_START = { C: '18:00', O: '11:00', X: '17:00' };

@@ -3,10 +3,10 @@
 // any type on that weekday if there are none. Meetings are only compared with meetings, and other
 // shifts never with meetings.
 
-import { DAYS, fromKey } from './dates.js';
-import { SHIFT_TYPES } from './shifts.js';
+import { dayName, fromKey } from './dates.js';
+import { t } from './i18n.js';
 
-// -> { shifts, label } e.g. label "12 Friday closing shifts", or null.
+// -> { shifts, label } e.g. label "12 Friday closing shifts" (in the current language), or null.
 export function pastShifts(shifts, key, shift) {
   const weekday = fromKey(key).getDay();
   const isMeeting = shift.type === 'M';
@@ -19,6 +19,8 @@ export function pastShifts(shifts, key, shift) {
   if (!sameType) past = candidates;
   if (!past.length) return null;
 
-  const kind = sameType ? `${DAYS[weekday]} ${SHIFT_TYPES[shift.type].toLowerCase()}` : DAYS[weekday];
-  return { shifts: past, label: `${past.length} ${kind} ${past.length === 1 ? 'shift' : 'shifts'}` };
+  const label = t(sameType ? 'estimate.source' : 'estimate.sourceAny', {
+    count: past.length, weekday: dayName(weekday), type: t(`estimate.type.${shift.type}`),
+  });
+  return { shifts: past, label };
 }

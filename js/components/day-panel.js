@@ -6,20 +6,21 @@
 import { el } from '../dom.js';
 import { icon } from '../icons.js';
 import { formatLongDay, fromKey } from '../dates.js';
-import { SHIFT_TYPES, hasEnd, hasTips, shiftMinutes } from '../shifts.js';
+import { hasEnd, hasTips, shiftMinutes, typeName } from '../shifts.js';
 import { formatEuro, formatHours, formatTimeRange } from '../format.js';
 import { getShift, getShifts, removeShift, updateShift } from '../storage.js';
 import { estimateTips } from '../tips-estimate.js';
 import { formatAmountInput, parseAmount } from '../amount.js';
 import { clearDraft, clearDrafts, getDraft, setDraft } from '../drafts.js';
+import { t } from '../i18n.js';
 import { shiftBadge } from './shift-badge.js';
 import { barRow, endedRow, startedRow } from './time-rows.js';
 
 const fieldLabel = (id, text) => el('label', { class: 'field-label span-4', for: id, text });
 
 const shiftStatus = (shift) => {
-  if (shift.completed) return 'Completed';
-  return shift.started ? 'Started' : 'Planned';
+  if (shift.completed) return t('status.completed');
+  return shift.started ? t('status.started') : t('status.planned');
 };
 
 function dayCard(key, shift, todayKey, showDate) {
@@ -29,7 +30,7 @@ function dayCard(key, shift, todayKey, showDate) {
       el('div', { class: 'day-shift' }, [
         shiftBadge(key, shift, todayKey),
         el('span', { class: 'day-shift-text' }, [
-          el('span', { class: 'week-type', text: SHIFT_TYPES[shift.type] }),
+          el('span', { class: 'week-type', text: typeName(shift.type) }),
           el('span', { class: 'day-shift-time', text: formatTimeRange(shift) }),
         ]),
         el('span', { class: 'day-shift-meta' }, [
@@ -37,15 +38,15 @@ function dayCard(key, shift, todayKey, showDate) {
           el('span', { class: 'day-shift-status', text: shiftStatus(shift) }),
         ]),
       ]),
-      shift.tips > 0 && el('span', { class: 'day-shift-extra', text: `Tips ${formatEuro(shift.tips)}` }),
-      shift.barOpen && el('span', { class: 'day-shift-extra', text: `Bar opened ${shift.barOpen}` }),
-      shift.barClose && el('span', { class: 'day-shift-extra', text: `Bar closed ${shift.barClose}` }),
+      shift.tips > 0 && el('span', { class: 'day-shift-extra', text: t('day.tips', { amount: formatEuro(shift.tips) }) }),
+      shift.barOpen && el('span', { class: 'day-shift-extra', text: t('day.barOpened', { time: shift.barOpen }) }),
+      shift.barClose && el('span', { class: 'day-shift-extra', text: t('day.barClosed', { time: shift.barClose }) }),
       estimate && el('span', {
         class: 'day-shift-extra',
-        text: `Estimated tips ≈ ${formatEuro(estimate.amount)} · ${estimate.label.replace('average of ', '')}`,
+        text: t('day.estimatedTips', { amount: formatEuro(estimate.amount), source: estimate.label }),
       }),
     ]
-    : [el('span', { class: 'day-card-off', text: 'No shift' })];
+    : [el('span', { class: 'day-card-off', text: t('day.noShift') })];
 
   return el('div', { class: 'day-card span-4' }, [
     showDate && el('span', { class: 'day-card-date', text: formatLongDay(fromKey(key)) }),
@@ -63,7 +64,7 @@ function actions(key, shift, onChange, from, collapsed) {
     return [el('button', {
       type: 'button',
       class: 'button button-primary button-block span-4',
-      text: 'Add shift',
+      text: t('actions.add'),
       onClick: () => { window.location.hash = `#/shift/new/${key}${back}`; },
     })];
   }
@@ -71,7 +72,7 @@ function actions(key, shift, onChange, from, collapsed) {
     ? el('button', {
       type: 'button',
       class: 'button button-edit button-block span-2',
-      'aria-label': 'Edit shift',
+      'aria-label': t('actions.edit'),
       'aria-pressed': String(collapsed.open),
       'aria-expanded': String(collapsed.open),
       'data-focus-key': 'edit-toggle',
@@ -80,7 +81,7 @@ function actions(key, shift, onChange, from, collapsed) {
     : el('button', {
       type: 'button',
       class: 'button button-edit button-block span-2',
-      'aria-label': 'Edit shift',
+      'aria-label': t('actions.edit'),
       onClick: () => { window.location.hash = editHash(key, back); },
     }, [icon('edit')]);
   return [
@@ -88,9 +89,9 @@ function actions(key, shift, onChange, from, collapsed) {
     el('button', {
       type: 'button',
       class: 'button button-delete button-block span-2',
-      'aria-label': 'Delete shift',
+      'aria-label': t('actions.delete'),
       onClick: () => {
-        if (!window.confirm('Delete this shift?')) return;
+        if (!window.confirm(t('actions.deleteConfirm'))) return;
         removeShift(key);
         clearDrafts(key);
         onChange();
@@ -106,7 +107,7 @@ function tipsRow(key, shift, onChange) {
   const saved = shift?.tips || 0;
   const draft = shift ? getDraft(key, 'tips') : null;
   const input = el('input', {
-    id: 'tips-amount', type: 'text', inputmode: 'decimal', autocomplete: 'off', placeholder: '0,00',
+    id: 'tips-amount', type: 'text', inputmode: 'decimal', autocomplete: 'off', placeholder: t('placeholder.amount'),
     class: 'input field-input span-2', disabled: !shift,
     value: draft ?? (saved > 0 ? formatAmountInput(saved, 2) : ''),
   });
@@ -120,7 +121,7 @@ function tipsRow(key, shift, onChange) {
     class: 'button button-primary button-compact button-block span-2',
     'data-focus-key': 'add-tips',
     disabled: true,
-    text: saved > 0 ? 'Edit tips' : 'Add tips',
+    text: saved > 0 ? t('tips.edit') : t('tips.add'),
     onClick: () => {
       if (!canSave()) return;
       clearDraft(key, 'tips');
@@ -133,7 +134,7 @@ function tipsRow(key, shift, onChange) {
     setDraft(key, 'tips', input.value);
     button.disabled = !shift || !canSave();
   });
-  return [fieldLabel('tips-amount', 'Tips (€)'), input, button];
+  return [fieldLabel('tips-amount', t('tips.label')), input, button];
 }
 
 // Started and Ended show the current time until they're logged.
@@ -156,7 +157,7 @@ export function renderDayPanel({
       collapsed && el('button', {
         type: 'button',
         class: 'button button-block span-4',
-        text: 'Edit shift details',
+        text: t('actions.editDetails'),
         onClick: () => { window.location.hash = editHash(key, from ? `/${from}` : ''); },
       }),
     ]

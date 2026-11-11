@@ -3,6 +3,7 @@
 
 import { el } from '../dom.js';
 import { formatEuro, formatHours } from '../format.js';
+import { t } from '../i18n.js';
 
 const row = (label, value) => el('div', { class: 'sofar-row' }, [
   el('span', { class: 'sofar-label', text: label }),
@@ -13,10 +14,10 @@ export function renderSoFar({ heading, totals }) {
   return [
     el('h3', { class: 'group-label span-4', text: heading }),
     el('div', { class: 'sofar-card span-4' }, [
-      row('Hours worked', formatHours(totals.minutes)),
-      row('Shifts', String(totals.count)),
-      row('Tips earned', formatEuro(totals.tips)),
-      row('Non-tip hours', formatHours(totals.nonTip)),
+      row(t('soFar.hours'), formatHours(totals.minutes)),
+      row(t('soFar.shifts'), String(totals.count)),
+      row(t('soFar.tips'), formatEuro(totals.tips)),
+      row(t('soFar.nonTip'), formatHours(totals.nonTip)),
     ]),
   ];
 }

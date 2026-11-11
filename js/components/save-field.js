@@ -5,8 +5,9 @@
 
 import { el } from '../dom.js';
 import { formatAmountInput, parseAmount } from '../amount.js';
+import { t } from '../i18n.js';
 
-export function saveField({ id, label, value, buttonText, isValid, onSave, decimals = 2, placeholder = '0,00' }) {
+export function saveField({ id, label, value, buttonText, isValid, onSave, decimals = 2, placeholder = t('placeholder.amount') }) {
   const input = el('input', {
     id, type: 'text', inputmode: 'decimal', autocomplete: 'off', placeholder,
     class: 'input field-input span-2', value: formatAmountInput(value, decimals),

@@ -18,10 +18,10 @@ const PV_CHILDLESS = 0.006; // Childless surcharge, on the full SV-Brutto
 const EMPLOYEE_ALLOWANCE = 1230; // Arbeitnehmer-Pauschbetrag (per year)
 const SPECIAL_EXPENSES = 36;     // Sonderausgaben-Pauschbetrag (per year)
 
-// Rate labels shown next to each line, matching the constants above.
-export const RATE_LABELS = {
-  kv: '14,60 + 3,20 %', rv: '18,60 %', av: '2,60 %', pv: '3,60 + 0,60 %', lst: '4 / 0,000 / 0,0',
-};
+// Rates shown next to each line (format.js formatRate), matching the constants above, and the
+// payslip-style LSt label (tax class / Freibetrag / children).
+export const RATES = { kv: [14.6, 3.2], rv: [18.6], av: [2.6], pv: [3.6, 0.6] };
+export const LST_LABEL = '4 / 0,000 / 0,0';
 
 const round2 = (v) => Math.round(v * 100) / 100;
 

@@ -3,26 +3,26 @@
 // Returns grid children (each carries its span).
 
 import { el } from '../dom.js';
-import { DAYS, fromKey } from '../dates.js';
-import { SHIFT_TYPES, hasTips } from '../shifts.js';
+import { formatDayNum, fromKey } from '../dates.js';
+import { hasTips, typeName } from '../shifts.js';
 import { formatEuro, formatHours } from '../format.js';
+import { t } from '../i18n.js';
 import { moneyCard, payTotal } from './money-card.js';
 
 function summary(p, completedTotal) {
-  if (!p.upcoming.length) return 'All of this month\'s shifts are completed.';
-  const count = p.upcoming.length;
-  let text = `${formatEuro(completedTotal)} completed + ≈ ${formatEuro(p.total - completedTotal)}`
-    + ` from ${count} ${count === 1 ? 'shift' : 'shifts'} to come`;
-  if (p.noEstimate) text += ` (${p.noEstimate} without an estimate)`;
+  if (!p.upcoming.length) return t('proj.allDone');
+  let text = t('proj.summary', {
+    completed: formatEuro(completedTotal), more: formatEuro(p.total - completedTotal), count: p.upcoming.length,
+  });
+  if (p.noEstimate) text += t('proj.noEstimate', { count: p.noEstimate });
   return text;
 }
 
 function shiftRow({ key, shift, minutes, tips, gross, hasEstimate }, rate) {
-  const date = fromKey(key);
-  const label = `${DAYS[date.getDay()].slice(0, 3)} ${date.getDate()} · ${SHIFT_TYPES[shift.type]}`;
-  if (!hasEstimate) return { label, note: 'no estimate yet', noteBelow: true, value: '–' };
+  const label = `${formatDayNum(fromKey(key))} · ${typeName(shift.type)}`;
+  if (!hasEstimate) return { label, note: t('note.noEstimate'), noteBelow: true, value: '–' };
 
-  const parts = [`≈ ${formatHours(minutes)}`, hasTips(shift) && `${formatEuro(tips)} tips`];
+  const parts = [`≈ ${formatHours(minutes)}`, hasTips(shift) && t('proj.tipsPart', { amount: formatEuro(tips) })];
   return {
     label,
     note: parts.filter(Boolean).join(' + '),
@@ -33,14 +33,11 @@ function shiftRow({ key, shift, minutes, tips, gross, hasEstimate }, rate) {
 
 export function renderProjection({ projection, completedTotal, monthName, rate }) {
   const p = projection;
-  const total = payTotal({ label: `Projected pay, ${monthName}`, value: formatEuro(p.total), note: summary(p, completedTotal) });
+  const total = payTotal({ label: t('proj.label', { month: monthName }), value: formatEuro(p.total), note: summary(p, completedTotal) });
   if (!p.upcoming.length) return [total];
   return [
     total,
     moneyCard(p.upcoming.map((u) => shiftRow(u, rate))),
-    el('p', {
-      class: 'sofar-note span-4',
-      text: '≈ is the average of your completed shifts on the same weekday, before deductions.',
-    }),
+    el('p', { class: 'sofar-note span-4', text: t('proj.note') }),
   ];
 }

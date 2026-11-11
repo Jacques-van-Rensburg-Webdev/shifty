@@ -1,12 +1,14 @@
 // Date helpers. Days are stored by key 'YYYY-MM-DD' (local time).
-// Weeks run Monday to Sunday.
+// Weeks run Monday to Sunday. Names and date patterns come from the current language (i18n.js).
 
-export const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'];
-export const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-export const WEEKDAY_INITIALS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+import { t } from './i18n.js';
 
-const shortMonth = (date) => MONTHS[date.getMonth()].slice(0, 3);
+export const dayName = (weekday) => t('date.days')[weekday];     // "Wednesday"
+export const dayShort = (weekday) => t('date.daysShort')[weekday]; // "Wed" / "Mi." / "mié"
+export const monthName = (month) => t('date.months')[month];      // "October"
+const monthShort = (month) => t('date.monthsShort')[month];       // "Oct"
+export const weekdayInitials = () => t('date.initials');          // Monday first
+
 const pad = (n) => String(n).padStart(2, '0');
 
 export function toKey(date) {
@@ -54,22 +56,29 @@ export function startOfWeek(date) {
   return addDays(date, -((date.getDay() + 6) % 7));
 }
 
-// "Mon 20 Oct"
+// "Mon 20 Oct" · "Mo. 20. Okt." · "lun 20 oct"
 export function formatShortDay(date) {
-  return `${DAYS[date.getDay()].slice(0, 3)} ${date.getDate()} ${shortMonth(date)}`;
+  return t('date.shortDay', { wd: dayShort(date.getDay()), d: date.getDate(), mon: monthShort(date.getMonth()) });
 }
 
-// "Wednesday, 22 October"
+// "Mon 20" · "Mo. 20." · "lun 20"
+export function formatDayNum(date) {
+  return t('date.dayNum', { wd: dayShort(date.getDay()), d: date.getDate() });
+}
+
+// "Wednesday, 22 October" · "Mittwoch, 22. Oktober" · "miércoles, 22 de octubre"
 export function formatLongDay(date) {
-  return `${DAYS[date.getDay()]}, ${date.getDate()} ${MONTHS[date.getMonth()]}`;
+  return t('date.longDay', { weekday: dayName(date.getDay()), d: date.getDate(), month: monthName(date.getMonth()) });
 }
 
-// "October 2026"
+// "October 2026" · "Oktober 2026" · "octubre de 2026"
 export function formatMonth(date) {
-  return `${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
+  return t('date.month', { month: monthName(date.getMonth()), year: date.getFullYear() });
 }
 
-// "19 Oct – 25 Oct"
+// "19 Oct – 25 Oct" · "19. Okt. – 25. Okt." · "19 oct – 25 oct"
 export function formatRange(start, end) {
-  return `${start.getDate()} ${shortMonth(start)} – ${end.getDate()} ${shortMonth(end)}`;
+  return t('date.range', {
+    d1: start.getDate(), m1: monthShort(start.getMonth()), d2: end.getDate(), m2: monthShort(end.getMonth()),
+  });
 }

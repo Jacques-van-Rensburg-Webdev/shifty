@@ -3,17 +3,17 @@
 // Returns grid children (each carries its span).
 
 import { el } from '../dom.js';
-import { DAYS, addDays, formatRange, fromKey } from '../dates.js';
-import { SHIFT_TYPES } from '../shifts.js';
+import { addDays, formatDayNum, formatRange, fromKey } from '../dates.js';
+import { typeName } from '../shifts.js';
 import { formatEuro } from '../format.js';
 import { weekTips } from '../week-tips.js';
+import { t } from '../i18n.js';
 import { moneyCard } from './money-card.js';
 
 function shiftRow({ key, shift, kind, amount }, todayKey) {
-  const date = fromKey(key);
-  const notes = [key === todayKey && 'today', kind === 'none' && 'no estimate yet'];
+  const notes = [key === todayKey && t('note.today'), kind === 'none' && t('note.noEstimate')];
   return {
-    label: `${DAYS[date.getDay()].slice(0, 3)} ${date.getDate()} · ${SHIFT_TYPES[shift.type]}`,
+    label: `${formatDayNum(fromKey(key))} · ${typeName(shift.type)}`,
     note: notes.filter(Boolean).join(' · ') || null,
     noteBelow: true,
     value: kind === 'estimate' ? `≈ ${formatEuro(amount)}` : (kind === 'none' ? '–' : formatEuro(amount)),
@@ -25,12 +25,12 @@ export function renderWeekTips({ shifts, date, todayKey }) {
   const first = fromKey(w.firstKey);
   const rows = w.rows.length
     ? w.rows.map((row) => shiftRow(row, todayKey))
-    : [{ label: 'No shifts this week', value: '' }];
+    : [{ label: t('weekTips.none'), value: '' }];
   return [
-    el('h3', { class: 'group-label span-4', text: `This week's tips · ${formatRange(first, addDays(first, 6))}` }),
+    el('h3', { class: 'group-label span-4', text: `${t('weekTips.heading')} · ${formatRange(first, addDays(first, 6))}` }),
     moneyCard([
       ...rows,
-      { label: 'Predicted tips', value: w.expected > 0 ? `≈ ${formatEuro(w.predicted)}` : formatEuro(w.predicted), kind: 'total' },
+      { label: t('weekTips.predicted'), value: w.expected > 0 ? `≈ ${formatEuro(w.predicted)}` : formatEuro(w.predicted), kind: 'total' },
     ]),
   ];
 }

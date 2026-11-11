@@ -7,10 +7,11 @@
 
 import { el } from '../dom.js';
 import { isValidKey } from '../dates.js';
-import { DEFAULT_START, SHIFT_TYPES, barKind, endsNextDay, shiftMinutes } from '../shifts.js';
+import { DEFAULT_START, TYPE_CODES, barKind, endsNextDay, shiftMinutes, typeName } from '../shifts.js';
 import { formatHours } from '../format.js';
 import { getShift, removeShift, setShift } from '../storage.js';
 import { clearDrafts } from '../drafts.js';
+import { t } from '../i18n.js';
 import { selectDay } from './calendar.js';
 import { pickerField } from '../components/picker-field.js';
 
@@ -34,8 +35,8 @@ export function render(container, [mode, key, from] = []) {
 
   const dateInput = el('input', { id: 'shift-date', type: 'date', class: 'input field-input', value: key });
   const typeSelect = el('select', { id: 'shift-type', class: 'input field-input span-4' },
-    Object.entries(SHIFT_TYPES).map(([code, name]) => el('option', {
-      value: code, text: name, selected: (existing?.type ?? 'C') === code,
+    TYPE_CODES.map((code) => el('option', {
+      value: code, text: typeName(code), selected: (existing?.type ?? 'C') === code,
     })));
   const startInput = el('input', {
     id: 'shift-start', type: 'time', class: 'input field-input',
@@ -50,7 +51,7 @@ export function render(container, [mode, key, from] = []) {
   const withEnd = Boolean(existing?.completed);
   const endInput = withEnd && el('input', { id: 'shift-end', type: 'time', class: 'input field-input', value: existing.end });
   const hint = el('p', { class: 'form-hint span-4', 'aria-live': 'polite' });
-  const save = el('button', { type: 'submit', class: 'button button-primary button-block span-2 mt-1', text: 'Save' });
+  const save = el('button', { type: 'submit', class: 'button button-primary button-block span-2 mt-1', text: t('form.save') });
 
   // Shows the shift length, or why it can't be saved yet.
   const check = () => {
@@ -58,12 +59,12 @@ export function render(container, [mode, key, from] = []) {
     const shift = { start: startInput.value, end: withEnd ? endInput.value : null };
     let message;
     if (!isValidKey(date) || !shift.start || (withEnd && !shift.end)) {
-      message = withEnd ? 'Fill in the date, start and end.' : 'Fill in the date and start time.';
-    } else if (withEnd && shift.start === shift.end) message = "Start and end can't be the same.";
-    else if (getShift(date) && !(isEdit && date === key)) message = 'There is already a shift on that day.';
+      message = withEnd ? t('form.fillDateStartEnd') : t('form.fillDateStart');
+    } else if (withEnd && shift.start === shift.end) message = t('form.sameTime');
+    else if (getShift(date) && !(isEdit && date === key)) message = t('form.exists');
     const ok = !message;
-    let summary = 'The end time is logged with End on the day.';
-    if (withEnd) summary = `${formatHours(shiftMinutes(shift))}${endsNextDay(shift) ? ', ends next day' : ''}`;
+    let summary = t('form.endLoggedLater');
+    if (withEnd) summary = `${formatHours(shiftMinutes(shift))}${endsNextDay(shift) ? t('form.endsNextDay') : ''}`;
     hint.textContent = ok ? summary : message;
     save.disabled = !ok;
     return ok;
@@ -93,14 +94,14 @@ export function render(container, [mode, key, from] = []) {
   };
 
   container.append(el('form', { class: 'grid', novalidate: true, onSubmit: submit, onInput: check, onChange: check }, [
-    el('h2', { class: 'section-title span-4', text: isEdit ? 'Edit shift' : 'Add shift' }),
-    fieldLabel('shift-date', 'Date', 4), pickerField(dateInput, { span: 4, iconName: 'calendar' }),
-    fieldLabel('shift-type', 'Type', 4), typeSelect,
+    el('h2', { class: 'section-title span-4', text: isEdit ? t('form.edit') : t('form.add') }),
+    fieldLabel('shift-date', t('form.date'), 4), pickerField(dateInput, { span: 4, iconName: 'calendar' }),
+    fieldLabel('shift-type', t('form.type'), 4), typeSelect,
     ...(withEnd
-      ? [fieldLabel('shift-start', 'Start', 2), fieldLabel('shift-end', 'End', 2), pickerField(startInput), pickerField(endInput)]
-      : [fieldLabel('shift-start', 'Start', 4), pickerField(startInput, { span: 4 })]),
+      ? [fieldLabel('shift-start', t('form.start'), 2), fieldLabel('shift-end', t('form.end'), 2), pickerField(startInput), pickerField(endInput)]
+      : [fieldLabel('shift-start', t('form.start'), 4), pickerField(startInput, { span: 4 })]),
     hint,
-    el('button', { type: 'button', class: 'button button-block span-2 mt-1', text: 'Cancel', onClick: back }),
+    el('button', { type: 'button', class: 'button button-block span-2 mt-1', text: t('form.cancel'), onClick: back }),
     save,
   ]));
   check();

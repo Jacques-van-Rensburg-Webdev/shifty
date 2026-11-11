@@ -4,9 +4,10 @@
 // has no end yet (shifts are scheduled with a start time only).
 
 import { el, redraw } from '../dom.js';
-import { DAYS, MONTHS, addDays, toKey, today } from '../dates.js';
+import { addDays, formatLongDay, toKey, today } from '../dates.js';
 import { endsNextDay, hasEnd } from '../shifts.js';
 import { getShift, getShifts } from '../storage.js';
+import { t } from '../i18n.js';
 import { renderDayPanel } from '../components/day-panel.js';
 import { renderWeekTips } from '../components/week-tips.js';
 
@@ -19,9 +20,9 @@ function currentDay() {
   const lastNight = getShift(yesterdayKey);
   const unfinished = lastNight && !lastNight.completed && (!hasEnd(lastNight) || endsNextDay(lastNight));
   if (new Date().getHours() < LAST_NIGHT_UNTIL && unfinished) {
-    return { todayDate, key: yesterdayKey, heading: 'Last night\'s shift', isLastNight: true };
+    return { todayDate, key: yesterdayKey, heading: t('home.lastNightShift'), isLastNight: true };
   }
-  return { todayDate, key: toKey(todayDate), heading: 'Today\'s shift', isLastNight: false };
+  return { todayDate, key: toKey(todayDate), heading: t('home.todayShift'), isLastNight: false };
 }
 
 // Redraw when coming back to the app if the day (or last night's shift) has changed.
@@ -40,8 +41,8 @@ export function render(container) {
 
   const d = day.todayDate;
   container.append(el('div', { class: 'grid' }, [
-    el('h2', { class: 'section-title span-4', text: 'Today' }),
-    el('p', { class: 'today-date span-4', text: `${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}` }),
+    el('h2', { class: 'section-title span-4', text: t('home.title') }),
+    el('p', { class: 'today-date span-4', text: formatLongDay(d) }),
     ...renderDayPanel({
       key: day.key,
       todayKey,
