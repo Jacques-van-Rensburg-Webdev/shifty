@@ -6,13 +6,15 @@
 import { dayName, fromKey } from './dates.js';
 import { t } from './i18n.js';
 
+// excludeTipOutliers: leave out shifts whose tips were marked as unusual (for tips estimates).
 // -> { shifts, label } e.g. label "12 Friday closing shifts" (in the current language), or null.
-export function pastShifts(shifts, key, shift) {
+export function pastShifts(shifts, key, shift, { excludeTipOutliers = false } = {}) {
   const weekday = fromKey(key).getDay();
   const isMeeting = shift.type === 'M';
 
   const candidates = Object.entries(shifts)
     .filter(([k, s]) => s.completed && fromKey(k).getDay() === weekday && (s.type === 'M') === isMeeting)
+    .filter(([, s]) => !(excludeTipOutliers && s.tipsOutlier))
     .map(([, s]) => s);
   let past = candidates.filter((s) => s.type === shift.type);
   const sameType = past.length > 0;

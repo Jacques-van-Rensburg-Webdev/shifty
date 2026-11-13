@@ -38,7 +38,10 @@ function dayCard(key, shift, todayKey, showDate) {
           el('span', { class: 'day-shift-status', text: shiftStatus(shift) }),
         ]),
       ]),
-      shift.tips > 0 && el('span', { class: 'day-shift-extra', text: t('day.tips', { amount: formatEuro(shift.tips) }) }),
+      shift.tips > 0 && el('span', {
+        class: 'day-shift-extra',
+        text: t(shift.tipsOutlier ? 'day.tipsExcluded' : 'day.tips', { amount: formatEuro(shift.tips) }),
+      }),
       shift.barOpen && el('span', { class: 'day-shift-extra', text: t('day.barOpened', { time: shift.barOpen }) }),
       shift.barClose && el('span', { class: 'day-shift-extra', text: t('day.barClosed', { time: shift.barClose }) }),
       estimate && el('span', {
@@ -103,6 +106,8 @@ function actions(key, shift, onChange, from, collapsed) {
 // The field shows the saved tips and the button sets them to the amount entered (it doesn't add).
 // "Add tips" until tips are saved, then "Edit tips". An empty field or 0 removes the tips.
 // A comma or a dot works for cents ("12,50"). An amount typed but not saved yet is kept as a draft.
+// The checkbox under it marks the tips as unusual (a special event): still earned, but left out of
+// every tips estimate. It is saved as soon as it is toggled.
 function tipsRow(key, shift, onChange) {
   const saved = shift?.tips || 0;
   const draft = shift ? getDraft(key, 'tips') : null;
@@ -134,7 +139,16 @@ function tipsRow(key, shift, onChange) {
     setDraft(key, 'tips', input.value);
     button.disabled = !shift || !canSave();
   });
-  return [fieldLabel('tips-amount', t('tips.label')), input, button];
+  const outlier = el('input', {
+    id: 'tips-outlier', type: 'checkbox', class: 'check-input', disabled: !shift,
+    checked: Boolean(shift?.tipsOutlier), 'data-focus-key': 'tips-outlier',
+    onChange: () => { updateShift(key, { tipsOutlier: outlier.checked }); onChange(); },
+  });
+  const outlierField = el('label', { class: 'check-field span-4', for: 'tips-outlier' }, [
+    outlier,
+    el('span', { class: 'check-text', text: t('tips.exclude') }),
+  ]);
+  return [fieldLabel('tips-amount', t('tips.label')), input, button, outlierField];
 }
 
 // Started and Ended show the current time until they're logged.

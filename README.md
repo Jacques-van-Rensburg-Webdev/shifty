@@ -54,7 +54,8 @@ js/live-time.js         current time for Finished at / Bar closed at, kept up to
 js/deductions.js        German deductions estimate (Übergangsbereich, SV, 2026 LSt)
 js/pay-calc.js          estimated pay for a month (no HTML)
 js/month-projection.js  projected pay for the whole month, planned shifts estimated (no HTML)
-js/past-shifts.js       completed shifts on the same weekday, for estimates (no HTML)
+js/past-shifts.js       completed shifts on the same weekday, for estimates (no HTML); tips marked
+                        "not used for predictions" (special events) are left out of tips estimates
 js/hours-estimate.js    estimated length of a planned shift (no HTML)
 js/tips-estimate.js     estimated tips from completed shifts on the same weekday (no HTML)
 js/week-tips.js         this week's tips: earned, still expected, predicted (no HTML)

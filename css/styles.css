@@ -209,6 +209,44 @@ button { cursor: pointer; }
   text-transform: uppercase;
   color: var(--color-text-muted);
 }
+/* Checkbox row: 48pt tap target, 24pt box, small text */
+.check-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--size-tap);
+  cursor: pointer;
+}
+/* The box is drawn here (the reset turns off the native one): hairline ink outline, red fill when ticked */
+.check-input {
+  display: grid;
+  place-content: center;
+  width: var(--size-icon);
+  height: var(--size-icon);
+  margin: 0;
+  flex: none;
+  border: var(--border-hairline) solid var(--color-ink);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  cursor: pointer;
+}
+.check-input::before {
+  content: '';
+  width: var(--size-icon-sm);
+  height: var(--size-icon-sm);
+  border-radius: var(--space-0-5);
+  background: var(--color-primary);
+  transform: scale(0);
+}
+.check-input:checked::before { transform: scale(1); }
+.check-input:disabled { opacity: var(--opacity-disabled); cursor: not-allowed; }
+.check-input:focus-visible { outline: var(--border-rule) solid var(--color-primary); outline-offset: var(--border-rule); }
+.check-text {
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--color-text-muted);
+}
+
 /* Underlined label: display caps on a 4pt rule */
 .label {
   width: fit-content;

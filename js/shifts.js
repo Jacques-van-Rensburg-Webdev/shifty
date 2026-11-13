@@ -1,6 +1,7 @@
 // Shift calculations. No HTML here.
 // A shift: { type: 'C' | 'O' | 'X' | 'M', start: 'HH:MM', end: 'HH:MM' | null, plannedStart, plannedEnd,
-//           started, completed, barOpen, barClose, tips }
+//           started, completed, barOpen, barClose, tips, tipsOutlier }
+// tipsOutlier: the tips were unusual (a special event) and are left out of tips estimates.
 // Shifts are scheduled with a start time only; end is set when the shift is ended (completed shifts
 // always have one). Older shifts may have a planned end.
 // If end is at or before start, the shift runs past midnight; it belongs to the day it starts.
